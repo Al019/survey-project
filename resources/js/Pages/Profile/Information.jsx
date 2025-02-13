@@ -1,11 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-const Dashboard = () => {
+const Information = () => {
   return (
     <AuthenticatedLayout>
-
+        
     </AuthenticatedLayout>
   )
 }
 
-export default Dashboard
+export default Information

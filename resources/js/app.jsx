@@ -1,13 +1,15 @@
 import '../css/app.css';
 import './bootstrap';
-import 'preline'
+import 'preline';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { HSStaticMethods } from "preline";
 
-HSStaticMethods.autoInit();
+document.addEventListener('DOMContentLoaded', () => {
+    HSStaticMethods.autoInit();
+});
 
 const observer = new MutationObserver((mutationsList) => {
     for (const mutation of mutationsList) {
@@ -37,6 +39,6 @@ createInertiaApp({
         root.render(<App {...props} />);
     },
     progress: {
-        color: '#4B5563',
+        color: '#4caf50',
     },
 });
