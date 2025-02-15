@@ -1,28 +1,11 @@
 import '../css/app.css';
 import './bootstrap';
-import 'preline';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-import { HSStaticMethods } from "preline";
-
-document.addEventListener('DOMContentLoaded', () => {
-    HSStaticMethods.autoInit();
-});
-
-const observer = new MutationObserver((mutationsList) => {
-    for (const mutation of mutationsList) {
-        HSStaticMethods.autoInit();
-    }
-});
-
-observer.observe(document.body, {
-    attributes: true,
-    subtree: true,
-    childList: true,
-    characterData: true,
-});
+import { SidebarProvider } from './Contexts/SidebarContext';
+import { ToastProvider } from './Contexts/ToastContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -36,7 +19,13 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <SidebarProvider>
+                <ToastProvider>
+                    <App {...props} />
+                </ToastProvider>
+            </SidebarProvider>
+        );
     },
     progress: {
         color: '#4caf50',

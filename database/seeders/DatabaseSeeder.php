@@ -21,19 +21,8 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'User',
             'gender' => 'Male',
             'email' => 'admin@gmail.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('P@ssw0rd'),
             'role' => 'admin',
-            'status'=> 'active',
-            'is_default' => 1,
-        ]);
-
-        User::factory()->create([
-            'last_name' => 'Enumerator',
-            'first_name' => 'User',
-            'gender' => 'Male',
-            'email' => 'enumerator@gmail.com',
-            'password' => Hash::make('password'),
-            'role' => 'enumerator',
             'status'=> 'active',
             'is_default' => 1,
         ]);

@@ -55,14 +55,14 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
 
   return (
     <Card className="shadow-none border border-gray-200">
-      <CardBody className="space-y-6 max-sm:p-4">
+      <CardBody className="space-y-6 max-sm:space-y-3 max-sm:p-3">
         <div className="flex items-center justify-between">
           <div className="flex flex-col text-sm font-medium">
             <span>List of {title}</span>
             <span>Total: {filteredData.length}</span>
           </div>
-          <div className='w-fit'>
-            <Input variant="standard" onChange={handleSearch} color="green" label="Search" />
+          <div className='w-[221px]'>
+            <Input onChange={handleSearch} color="green" label="Search" icon={<MagnifyingGlassIcon className="size-5" />} />
           </div>
         </div>
         <div className='overflow-x-auto'>
@@ -75,31 +75,32 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
             <table className="w-full table-auto text-left">
               <thead className="bg-blue-gray-50/50">
                 <tr>
-                  <th className="font-medium text-sm p-4 whitespace-nowrap">#</th>
+                  <th className="font-medium text-sm p-4 max-sm:p-3 whitespace-nowrap">#</th>
                   {data.theads.map((head, headIndex) => (
-                    <th key={headIndex} className="font-medium text-sm p-4 whitespace-nowrap">
+                    <th key={headIndex} className="font-medium text-sm p-4 max-sm:p-3 whitespace-nowrap">
                       {head}
                     </th>
                   ))}
                   {(onClickEdit || onClickAssign) && (
-                    <th className="font-medium text-sm p-4 whitespace-nowrap">Action</th>
+                    <th className="font-medium text-sm p-4 max-sm:p-3 whitespace-nowrap">Action</th>
                   )}
                 </tr>
               </thead>
               <tbody>
                 {records.map((record, recordIndex) => {
                   const { id, uuid, count_day, on_page, ...displayData } = record
-                  const isPending = displayData.submit_status === "pending"
 
                   return (
-                    <tr onClick={() => !isPending && onClickView(record[idKey])} key={recordIndex} className={`border-b hover:bg-blue-gray-50/50 ${onClickView && "cursor-pointer"}`}>
-                      <td className="p-4 font-normal text-sm whitespace-nowrap">
+                    <tr onClick={() => {
+                      (onClickEdit || onClickAssign) ? null : onClickView(record[idKey])
+                    }} key={recordIndex} className={`border-b hover:bg-blue-gray-50/50 ${onClickView && "cursor-pointer"}`}>
+                      <td className="p-4 max-sm:p-3 font-normal text-sm whitespace-nowrap">
                         {firstIndex + recordIndex + 1}
                       </td>
                       {Object.entries(displayData).map(([key, body], bodyIndex) => (
-                        <td key={bodyIndex} className={`p-4 font-normal text-sm whitespace-nowrap`}>
+                        <td key={bodyIndex} className={`p-4 max-sm:p-3 font-normal text-sm whitespace-nowrap`}>
                           {key === "status" ? (
-                            <Chip color={body === 'active' ? 'green' : 'red'} value={body} variant="outlined" className="w-fit" />
+                            <Chip color={body === 'active' ? 'green' : 'red'} value={body} variant="ghost" className="w-fit" />
                           ) : body === null ? (
                             "-"
                           ) : (
@@ -108,15 +109,15 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
                         </td>
                       ))}
                       {onClickEdit && (
-                        <td className="p-4 font-normal text-sm whitespace-nowrap cursor-pointer">
+                        <td className="p-4 max-sm:p-3 font-normal text-sm whitespace-nowrap cursor-pointer">
                           <IconButton onClick={() => onClickEdit(record)} color="green" size="sm" variant="text">
                             <PencilSquareIcon className="w-5 h-5" />
                           </IconButton>
                         </td>
                       )}
                       {onClickAssign && (
-                        <td className="p-4 cursor-pointer">
-                          <Button onClick={() => onClickAssign(record)} size="sm" color="green" variant="outlined" disabled={btnLoading[record.id]}>
+                        <td className="p-4 max-sm:p-3 cursor-pointer">
+                          <Button onClick={() => onClickAssign(record)} size="sm" color="green" disabled={btnLoading}>
                             Assign
                           </Button>
                         </td>
@@ -140,13 +141,14 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
                   className="flex items-center gap-3"
                   disabled={currentPage === 1}>
                   <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" />
+                  <span className="max-sm:hidden">Previous</span>
                 </Button>
                 <div className="flex items-center gap-2">
                   {numbers.map((number, index) => (
                     <IconButton
                       onClick={() => changeCurrentPage(number)}
                       color='green'
-                      variant={currentPage === number ? 'outlined' : 'text'}
+                      variant={currentPage === number ? 'filled' : 'text'}
                       key={index}
                       size='sm'>
                       {number}
@@ -159,6 +161,7 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
                   variant="text"
                   className="flex items-center gap-3"
                   disabled={currentPage === npage}>
+                  <span className="max-sm:hidden">Next</span>
                   <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
                 </Button>
               </div>

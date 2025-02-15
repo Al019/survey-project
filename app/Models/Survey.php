@@ -13,10 +13,8 @@ class Survey extends Model
 
     protected $fillable = [
         'admin_id',
-        'uuid',
         'title',
         'description',
-        'limit',
     ];
 
     public function user(): BelongsTo

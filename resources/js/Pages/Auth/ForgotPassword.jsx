@@ -1,55 +1,43 @@
-import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import Inpt from '@/Components/Input'
+import GuestLayout from '@/Layouts/GuestLayout'
+import { useForm } from '@inertiajs/react'
+import { Alert, Button } from '@material-tailwind/react'
 
-export default function ForgotPassword({ status }) {
+const ForgotPassword = ({ status }) => {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
     });
 
-    const submit = (e) => {
+    const handleSend = (e) => {
         e.preventDefault();
-
         post(route('password.email'));
     };
 
     return (
         <GuestLayout>
-            <Head title="Forgot Password" />
-
-            <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that will
-                allow you to choose a new one.
-            </div>
-
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
+                <Alert variant="outlined" color="green">
+                    <span className="text-sm">
+                        {status}
+                    </span>
+                </Alert>
             )}
-
-            <form onSubmit={submit}>
-                <TextInput
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={(e) => setData('email', e.target.value)}
-                />
-
-                <InputError message={errors.email} className="mt-2" />
-
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
-                </div>
+            {errors.email && (
+                <Alert variant="outlined" color="red">
+                    <span className="text-sm">
+                        {errors.email}
+                    </span>
+                </Alert>
+            )}
+            <form onSubmit={handleSend} className='space-y-6'>
+                <span className="font-bold text-base text-green-500">Forgot Password</span>
+                <Inpt value={data.email} onChange={(e) => setData('email', e.target.value)} label="Email Address" type='email' required />
+                <Button type='submit' color='green' fullWidth disabled={processing}>
+                    Send
+                </Button>
             </form>
         </GuestLayout>
     );
 }
+
+export default ForgotPassword

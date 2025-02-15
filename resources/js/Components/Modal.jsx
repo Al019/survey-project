@@ -1,65 +1,42 @@
-import {
-    Dialog,
-    DialogPanel,
-    Transition,
-    TransitionChild,
-} from '@headlessui/react';
+import { motion, AnimatePresence } from "framer-motion"
+import { useEffect } from "react"
 
-export default function Modal({
-    children,
-    show = false,
-    maxWidth = '2xl',
-    closeable = true,
-    onClose = () => {},
-}) {
-    const close = () => {
-        if (closeable) {
-            onClose();
-        }
-    };
+const Modal = ({ open, onClose, size = 'sm', children }) => {
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
 
-    const maxWidthClass = {
-        sm: 'sm:max-w-sm',
-        md: 'sm:max-w-md',
-        lg: 'sm:max-w-lg',
-        xl: 'sm:max-w-xl',
-        '2xl': 'sm:max-w-2xl',
-    }[maxWidth];
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [open])
 
-    return (
-        <Transition show={show} leave="duration-200">
-            <Dialog
-                as="div"
-                id="modal"
-                className="fixed inset-0 z-50 flex transform items-center overflow-y-auto px-4 py-6 transition-all sm:px-0"
-                onClose={close}
-            >
-                <TransitionChild
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                >
-                    <div className="absolute inset-0 bg-gray-500/75" />
-                </TransitionChild>
+  const maxWidthClass = {
+    'sm': 'sm:max-w-xl sm:w-full m-4 sm:mx-auto',
+    'md': 'md:max-w-2xl md:w-full m-4 md:mx-auto',
+    'lg': 'lg:max-w-4xl lg:w-full m-4 lg:mx-auto',
+  }[size]
 
-                <TransitionChild
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    enterTo="opacity-100 translate-y-0 sm:scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                    leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                >
-                    <DialogPanel
-                        className={`mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass}`}
-                    >
-                        {children}
-                    </DialogPanel>
-                </TransitionChild>
-            </Dialog>
-        </Transition>
-    );
+  return (
+    <AnimatePresence>
+      {open && (
+        <div onClick={onClose} className="size-full fixed top-0 start-0 z-[99] overflow-x-hidden overflow-y-auto bg-black bg-opacity-50" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }} className={`min-h-[calc(100%-3.5rem)] flex items-center ${maxWidthClass}`}>
+            <div className="w-full flex flex-col pointer-events-auto dark:bg-neutral-800 dark:border-neutral-700 dark:shadow-neutral-700/70" onClick={(e) => e.stopPropagation()}>
+              {children}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  )
 }
+
+export default Modal

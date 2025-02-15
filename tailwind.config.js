@@ -1,6 +1,5 @@
 const withMT = require("@material-tailwind/react/utils/withMT");
 
-/** @type {import('tailwindcss').Config} */
 module.exports = withMT({
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
@@ -23,8 +22,5 @@ module.exports = withMT({
         }
     },
 
-    plugins: [
-        require('preline/plugin'),
-    ],
-    darkMode: 'class',
+    plugins: [],
 });

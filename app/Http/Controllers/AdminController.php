@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Option;
 use App\Models\Question;
+use App\Models\Response;
 use App\Models\Survey;
+use App\Models\SurveyAssignment;
 use App\Models\User;
 use Hash;
 use Illuminate\Http\Request;
@@ -38,7 +40,7 @@ class AdminController extends Controller
 
         // $password = Str::random(8);
 
-        $password = 'password';
+        $password = "P@ssw0rd";
 
         User::create([
             "last_name" => $request->last_name,
@@ -75,13 +77,12 @@ class AdminController extends Controller
 
         $survey = Survey::create([
             "admin_id" => $user_id,
-            "uuid" => $request->uuid,
-            "title" => $request->survey["title"] ?? "Untitled form",
-            "description" => $request->survey["description"],
-            "limit" => $request->survey["limit"],
+            "title" => $request["title"] ?? "Untitled form",
+            "description" => $request["description"],
+            "limit" => $request["limit"],
         ]);
 
-        foreach ($request->survey["questions"] as $questionData) {
+        foreach ($request["questions"] as $questionData) {
             $question = Question::create([
                 'survey_id' => $survey->id,
                 'text' => $questionData['text'],
@@ -96,5 +97,53 @@ class AdminController extends Controller
                 ]);
             }
         }
+    }
+
+    public function viewSurvey(Request $request)
+    {
+        $survey = Survey::where('id', $request->survey_id)
+            ->withCount('response')
+            ->with('question.option')
+            ->first();
+
+        if (!$survey) {
+            abort(404);
+        }
+
+        $responses = Response::where('survey_id', $survey->id)
+            ->with('answer.answer_option')
+            ->get();
+
+        $notAssignEnumerators = User::where('role', 'enumerator')
+            ->whereDoesntHave('survey_assignment', function ($query) use ($survey) {
+                $query->where('survey_id', $survey->id);
+            })
+            ->get();
+
+        $assignEnumerators = User::where('role', 'enumerator')
+            ->whereHas('survey_assignment', function ($query) use ($survey) {
+                $query->where('survey_id', $survey->id);
+            })
+            ->withCount([
+                'response' => function ($query) use ($survey) {
+                    $query->where('survey_id', $survey->id);
+                }
+            ])
+            ->get();
+
+        return Inertia::render('Admin/Survey/View', [
+            'survey' => $survey,
+            'responses' => $responses,
+            'notAssignEnumerators' => $notAssignEnumerators,
+            'assignEnumerators' => $assignEnumerators,
+        ]);
+    }
+
+    public function assignEnumerator(Request $request)
+    {
+        SurveyAssignment::create([
+            'survey_id' => $request->survey_id,
+            'enumerator_id' => $request->enumerator_id,
+        ]);
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('survey_id')->constrained('surveys');
             $table->foreignId('enumerator_id')->constrained('users');
-            $table->string('limit')->nullable();
+            $table->string('target')->nullable();
             $table->timestamps();
         });
     }

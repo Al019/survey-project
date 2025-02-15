@@ -1,4 +1,4 @@
-import Inpt from '@/Components/material/Input';
+import Inpt from '@/Components/Input';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Link, useForm } from '@inertiajs/react';
 import { Alert, Button, Checkbox } from '@material-tailwind/react';
@@ -19,26 +19,23 @@ const Login = ({ status, canResetPassword }) => {
     };
 
     return (
-        <GuestLayout header={
-            <div className='space-y-6'>
-                {status && (
-                    <Alert variant="outlined" color="green">
-                        <span className="text-sm">
-                            {status}
-                        </span>
-                    </Alert>
-                )}
-                {(errors.email || errors.password) && (
-                    <Alert variant="outlined" color="red">
-                        <span className="text-sm">
-                            {errors.email || errors.password}
-                        </span>
-                    </Alert>
-                )}
-            </div>
-        }>
+        <GuestLayout>
+            {status && (
+                <Alert variant="ghost" color="green">
+                    <span className="text-sm">
+                        {status}
+                    </span>
+                </Alert>
+            )}
+            {(errors.email || errors.password) && (
+                <Alert variant="ghost" color="red">
+                    <span className="text-sm">
+                        {errors.email || errors.password}
+                    </span>
+                </Alert>
+            )}
             <form onSubmit={handleLogin} className='space-y-6'>
-                <span className="font-semibold text-green-500">Login</span>
+                <span className="font-bold text-base text-green-500">Login</span>
                 <div className="space-y-4">
                     <Inpt value={data.email} onChange={(e) => setData('email', e.target.value)} label="Email Address" type='email' required />
                     <div className="space-y-2">

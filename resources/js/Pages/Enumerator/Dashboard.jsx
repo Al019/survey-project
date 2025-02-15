@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 const Dashboard = () => {
   return (
-    <AuthenticatedLayout>
+    <AuthenticatedLayout title="Dashboard">
 
     </AuthenticatedLayout>
   )
