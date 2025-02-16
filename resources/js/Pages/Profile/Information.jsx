@@ -58,9 +58,9 @@ const Information = () => {
       }>
         <div className="max-w-[800px] mx-auto mt-[110px]">
           <TabsBody>
-            <TabPanel value="Personal Details" className="space-y-4">
+            <TabPanel value="Personal Details" className="space-y-4 max-sm:space-y-2 max-sm:p-2">
               <Card className='h-fit shadow-none border border-gray-200'>
-                <CardBody>
+                <CardBody className='max-sm:p-4'>
                   <div className='flex items-center gap-4'>
                     <img src={User} className="h-24 w-24" />
                     <div className='flex flex-col space-y-2'>
@@ -73,8 +73,8 @@ const Information = () => {
                 </CardBody>
               </Card>
               <Card className='h-fit shadow-none border border-gray-200'>
-                <CardBody className='space-y-6'>
-                  <div className='grid grid-cols-2 gap-4'>
+                <CardBody className='max-sm:p-4'>
+                  <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
                     <Inpt value={user.last_name} variant="standard" label="Last Name" />
                     <Inpt value={user.first_name} variant="standard" label="First Name" />
                     <Inpt value={user.middle_name === null ? '-' : user.middle_name} variant="standard" label="Middle Name" />
@@ -84,24 +84,24 @@ const Information = () => {
                 </CardBody>
               </Card>
             </TabPanel>
-            <TabPanel value="Change Password">
+            <TabPanel value="Change Password" className="max-sm:p-2">
               <Card className="shadow-none border border-gray-200">
-                <CardBody className="space-y-4">
+                <CardBody className="space-y-4 max-sm:p-4">
                   {user.is_default === 1 && (
-                    <div className="grid grid-cols-2">
+                    <div className="grid grid-cols-2 max-sm:grid-cols-1">
                       <div>
                         <Inpt value={data.current_password} onChange={(e) => setData('current_password', e.target.value)} label="Current Password" type='password' />
                         <InputError message={errors.current_password} className="mt-1" />
                       </div>
                     </div>
                   )}
-                  <div className="grid grid-cols-2">
+                  <div className="grid grid-cols-2 max-sm:grid-cols-1">
                     <div>
                       <Inpt value={data.password} onChange={(e) => setData('password', e.target.value)} label="New Password" type='password' />
                       <InputError message={errors.password} className="mt-1" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2">
+                  <div className="grid grid-cols-2 max-sm:grid-cols-1">
                     <div>
                       <Inpt value={data.password_confirmation} onChange={(e) => setData('password_confirmation', e.target.value)} label="Confirm Password" type='password' />
                       <InputError message={errors.password_confirmation} className="mt-1" />

@@ -8,12 +8,14 @@ const List = () => {
   const dataTable = {
     theads: [
       "Title",
+      "Responses",
       "Total Responses",
     ],
     tbodies: surveys.map((survey) => ({
       id: survey.id,
       title: survey.title,
-      reponse: survey.response_count,
+      enumerator_response: survey.enumerator_response_count,
+      total_reponse: survey.total_response_count,
     }))
   }
 
@@ -23,7 +25,7 @@ const List = () => {
 
   return (
     <AuthenticatedLayout title="Surveys">
-      <div className='p-4 mt-[80px]'>
+      <div className='p-4 mt-[80px] max-sm:p-2'>
         <Tbl title="Surveys" data={dataTable} idKey="id" onClickView={handleNavigate} />
       </div>
     </AuthenticatedLayout>

@@ -4,10 +4,33 @@ import { Button, Card, CardBody, Checkbox, Option, Radio, Select, Tab, TabPanel,
 import { useEffect, useState } from "react"
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { useToast } from "@/Contexts/ToastContext";
 
-ChartJS.register(ArcElement, Tooltip, Legend)
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 
-const colors = ["#f44336", "#4caf50", "#2196f3", "#ff9800", "#3f51b5"]
+const colors = [
+  "#f44336", // Red
+  "#4caf50", // Green
+  "#2196f3", // Blue
+  "#ff9800", // Orange
+  "#3f51b5", // Indigo
+  "#e91e63", // Pink
+  "#00bcd4", // Cyan
+  "#8bc34a", // Light Green
+  "#ffeb3b", // Yellow
+  "#9c27b0", // Purple
+  "#ff5722", // Deep Orange
+  "#009688", // Teal
+  "#cddc39", // Lime
+  "#673ab7", // Deep Purple
+  "#ffc107", // Amber
+  "#03a9f4", // Light Blue
+  "#795548", // Brown
+  "#607d8b", // Blue Grey
+  "#f06292", // Light Pink
+  "#4dd0e1", // Light Cyan
+];
 
 const tabs = ["Questions", "Responses"]
 
@@ -17,6 +40,7 @@ const View = () => {
   const [answer, setAnswer] = useState([])
   const [validationErrors, setValidationErrors] = useState([])
   const { post, processing } = useForm();
+  const { showToast } = useToast()
 
   useEffect(() => {
     const savedAnswers = localStorage.getItem(`answers_${survey.id}`)
@@ -25,29 +49,45 @@ const View = () => {
     }
   }, [survey])
 
-  const pieChartConfig = (series, labels) => ({
-    data: {
-      labels: labels, // Labels for the pie chart
-      datasets: [
-        {
-          data: series, // Data for the pie chart
-          backgroundColor: colors, // Use the predefined colors
-          borderWidth: 0, // Remove borders
-        },
-      ],
-    },
-    options: {
-      responsive: true, // Make the chart responsive
-      plugins: {
-        legend: {
-          display: false, // Hide the legend
-        },
-        tooltip: {
-          enabled: true, // Enable tooltips
+  const pieChartConfig = (series, labels) => {
+    const total = series.reduce((sum, value) => sum + value, 0);
+
+    return {
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: series,
+            backgroundColor: colors,
+            borderWidth: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            enabled: false, // Disable tooltips
+          },
+          datalabels: {
+            color: '#fff', // Set text color
+            anchor: 'center',
+            align: 'center',
+            font: {
+              size: 12,
+            },
+            formatter: (value, context) => {
+              let percentage = ((value / total) * 100).toFixed(2);
+              return percentage > 0 ? `${percentage}%` : ''; // Hide 0% values
+            },
+          },
         },
       },
-    },
-  });
+    };
+  };
 
   const calculateResponseData = (question) => {
     const optionCounts = question.option.map(opt => ({
@@ -160,6 +200,9 @@ const View = () => {
     }), {
       onSuccess: () => {
         localStorage.removeItem(`answers_${survey.id}`)
+        setAnswer([])
+        setValidationErrors([])
+        showToast("Submit response successfully.")
       }
     })
   }
@@ -167,7 +210,7 @@ const View = () => {
   return (
     <Tabs value={activeTab}>
       <AuthenticatedLayout title={survey.title} button={
-        <Button onClick={handleSubmit} color="green" disabled={processing}>
+        <Button onClick={handleSubmit} color="green" disabled={processing} className={activeTab !== tabs[0] ? 'hidden' : ''}>
           Submit
         </Button>
       } tab={
@@ -194,9 +237,9 @@ const View = () => {
       }>
         <div className="max-w-[800px] mx-auto mt-[110px]">
           <TabsBody>
-            <TabPanel value="Questions" className="space-y-4 pb-40">
+            <TabPanel value="Questions" className="space-y-4 max-sm:space-y-2 max-sm:p-2">
               <Card className="shadow-none border border-gray-200">
-                <CardBody className="space-y-4">
+                <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
                   <h1 className="font-medium">
                     {survey.title}
                   </h1>
@@ -207,7 +250,7 @@ const View = () => {
               </Card>
               {survey.question.map((question, qIndex) => (
                 <Card key={qIndex} className={`shadow-none ${validationErrors.includes(question.id) ? 'border-2 border-red-500' : 'border border-gray-200'}`}>
-                  <CardBody className="space-y-6">
+                  <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
                     <div className="space-y-3">
                       <span className="text-xs font-normal">Question {qIndex + 1} {question.required === 1 && <span className="text-red-500 text-sm">*</span>}</span>
                       <h1 className="text-sm font-medium">{question.text}</h1>
@@ -285,15 +328,23 @@ const View = () => {
                 </Card>
               ))}
             </TabPanel>
-            <TabPanel value="Responses">
+            <TabPanel value="Responses" className="max-sm:p-2">
               <Card className="shadow-none border border-gray-200">
-                <CardBody className="flex items-center justify-between">
+                <CardBody className="flex items-center justify-between max-sm:p-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-normal">
+                      Responses:
+                    </p>
+                    <h1 className="font-medium">
+                      {survey.enumerator_response_count}
+                    </h1>
+                  </div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-normal">
                       Total Responses:
                     </p>
                     <h1 className="font-medium">
-                      {responses.length}
+                      {survey.total_response_count}
                     </h1>
                   </div>
                 </CardBody>
@@ -301,8 +352,8 @@ const View = () => {
               {responses.length > 0 && (
                 <div className="mt-4 space-y-4 max-sm:space-y-2 max-sm:mt-2">
                   {survey.question?.map((question, qIndex) => (
-                    <Card key={qIndex} className="shadow-none max-h-[340px] overflow-y-auto border border-gray-200">
-                      <CardBody className="space-y-6">
+                    <Card key={qIndex} className="shadow-none max-h-[350px] overflow-y-auto border border-gray-200">
+                      <CardBody className="space-y-6 max-sm:p-4">
                         <div className="space-y-3">
                           <span className="text-xs font-normal">Question {qIndex + 1}</span>
                           <h1 className="text-sm font-medium">{question.text}</h1>
@@ -314,21 +365,23 @@ const View = () => {
                               const chartData = pieChartConfig(series, labels);
 
                               return (
-                                <div className="grid grid-cols-2 place-items-center max-sm:grid-cols-1">
-                                  <div style={{ width: '200px', height: '200px' }}>
-                                    <Pie data={chartData.data} options={chartData.options} />
+                                <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+                                  <div className="flex items-center justify-center">
+                                    <div style={{ width: '200px', height: '200px' }}>
+                                      <Pie data={chartData.data} options={chartData.options} />
+                                    </div>
                                   </div>
-                                  <div className="space-y-2">
+                                  <div className="space-y-2 flex flex-col justify-center items-start">
                                     {question.option.map((option, oIndex) => {
-                                      const count = series[oIndex];
                                       return (
                                         <div key={oIndex} className="flex items-center gap-2">
-                                          <div
-                                            style={{ backgroundColor: colors[oIndex] }}
-                                            className="size-4 rounded-full"
-                                          ></div>
+                                          <div>
+                                            <div
+                                              style={{ backgroundColor: colors[oIndex] }}
+                                              className="size-4 rounded-full"
+                                            ></div>
+                                          </div>
                                           <p className="text-sm font-normal">{option.text}</p>
-                                          <span className="text-sm font-normal">{`(${count})`}</span>
                                         </div>
                                       );
                                     })}

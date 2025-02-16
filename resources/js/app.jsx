@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { SidebarProvider } from './Contexts/SidebarContext';
 import { ToastProvider } from './Contexts/ToastContext';
+import { SecurityProvider } from './Contexts/SecurityContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -22,7 +23,9 @@ createInertiaApp({
         root.render(
             <SidebarProvider>
                 <ToastProvider>
+                    <SecurityProvider>
                     <App {...props} />
+                    </SecurityProvider>
                 </ToastProvider>
             </SidebarProvider>
         );

@@ -57,7 +57,7 @@ class AdminController extends Controller
 
     public function surveyList()
     {
-        $surveys = Survey::withCount('response')
+        $surveys = Survey::withCount('response', 'survey_assignment as assign_count')
             ->latest()
             ->get();
 

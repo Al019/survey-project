@@ -16,7 +16,7 @@ const ForgotPassword = ({ status }) => {
     return (
         <GuestLayout>
             {status && (
-                <Alert variant="outlined" color="green">
+                <Alert variant="ghost" color="green">
                     <span className="text-sm">
                         {status}
                     </span>

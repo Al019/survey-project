@@ -14,7 +14,7 @@ export const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       <ToastContainer position="top-right"
-        autoClose={3000}
+        autoClose={5000}
         hideProgressBar
         newestOnTop={false}
         closeOnClick={false}

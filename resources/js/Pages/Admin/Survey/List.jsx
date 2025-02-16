@@ -10,12 +10,14 @@ const List = () => {
   const dataTable = {
     theads: [
       "Title",
+      "Assign Enumerators",
       "Total Responses",
       "Date Created",
     ],
     tbodies: surveys.map((survey) => ({
       id: survey.id,
       title: survey.title,
+      assign: survey.assign_count,
       reponse: survey.response_count,
       created_at: formatDateTime(survey.created_at)
     }))

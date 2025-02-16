@@ -23,7 +23,12 @@ class EnumeratorController extends Controller
         $surveys = Survey::whereHas('survey_assignment', function ($query) use ($user_id) {
             $query->where('enumerator_id', $user_id);
         })
-            ->withCount('response')
+            ->withCount([
+                'response as total_response_count',
+                'response as enumerator_response_count' => function ($query) use ($user_id) {
+                    $query->where('enumerator_id', $user_id);
+                }
+            ])
             ->latest()
             ->get();
 
@@ -40,7 +45,12 @@ class EnumeratorController extends Controller
             ->whereHas('survey_assignment', function ($query) use ($user_id) {
                 $query->where('enumerator_id', $user_id);
             })
-            ->withCount('response')
+            ->withCount([
+                'response as total_response_count',
+                'response as enumerator_response_count' => function ($query) use ($user_id) {
+                    $query->where('enumerator_id', $user_id);
+                }
+            ])
             ->with('question.option')
             ->first();
 

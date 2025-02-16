@@ -55,7 +55,7 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
 
   return (
     <Card className="shadow-none border border-gray-200">
-      <CardBody className="space-y-6 max-sm:space-y-3 max-sm:p-3">
+      <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col text-sm font-medium">
             <span>List of {title}</span>
@@ -75,14 +75,14 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
             <table className="w-full table-auto text-left">
               <thead className="bg-blue-gray-50/50">
                 <tr>
-                  <th className="font-medium text-sm p-4 max-sm:p-3 whitespace-nowrap">#</th>
+                  <th className="font-medium text-sm p-4 whitespace-nowrap">#</th>
                   {data.theads.map((head, headIndex) => (
-                    <th key={headIndex} className="font-medium text-sm p-4 max-sm:p-3 whitespace-nowrap">
+                    <th key={headIndex} className="font-medium text-sm p-4 whitespace-nowrap">
                       {head}
                     </th>
                   ))}
                   {(onClickEdit || onClickAssign) && (
-                    <th className="font-medium text-sm p-4 max-sm:p-3 whitespace-nowrap">Action</th>
+                    <th className="font-medium text-sm p-4 whitespace-nowrap">Action</th>
                   )}
                 </tr>
               </thead>
@@ -94,11 +94,11 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
                     <tr onClick={() => {
                       (onClickEdit || onClickAssign) ? null : onClickView(record[idKey])
                     }} key={recordIndex} className={`border-b hover:bg-blue-gray-50/50 ${onClickView && "cursor-pointer"}`}>
-                      <td className="p-4 max-sm:p-3 font-normal text-sm whitespace-nowrap">
+                      <td className="p-4 font-normal text-sm whitespace-nowrap">
                         {firstIndex + recordIndex + 1}
                       </td>
                       {Object.entries(displayData).map(([key, body], bodyIndex) => (
-                        <td key={bodyIndex} className={`p-4 max-sm:p-3 font-normal text-sm whitespace-nowrap`}>
+                        <td key={bodyIndex} className={`p-4 font-normal text-sm whitespace-nowrap`}>
                           {key === "status" ? (
                             <Chip color={body === 'active' ? 'green' : 'red'} value={body} variant="ghost" className="w-fit" />
                           ) : body === null ? (
@@ -109,14 +109,14 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
                         </td>
                       ))}
                       {onClickEdit && (
-                        <td className="p-4 max-sm:p-3 font-normal text-sm whitespace-nowrap cursor-pointer">
+                        <td className="p-4 font-normal text-sm whitespace-nowrap cursor-pointer">
                           <IconButton onClick={() => onClickEdit(record)} color="green" size="sm" variant="text">
                             <PencilSquareIcon className="w-5 h-5" />
                           </IconButton>
                         </td>
                       )}
                       {onClickAssign && (
-                        <td className="p-4 max-sm:p-3 cursor-pointer">
+                        <td className="p-4 cursor-pointer">
                           <Button onClick={() => onClickAssign(record)} size="sm" color="green" disabled={btnLoading}>
                             Assign
                           </Button>
