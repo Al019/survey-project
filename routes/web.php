@@ -42,6 +42,7 @@ Route::middleware(['auth', 'enumerator'])->group(function () {
     Route::get('/enumerator/surveys', [EnumeratorController::class, 'surveyList'])->name('enumerator.survey.list');
     Route::get('/enumerator/surveys/view', [EnumeratorController::class, 'viewSurvey'])->name('enumerator.view.survey');
     Route::post('/enumerator/surveys/view', [EnumeratorController::class, 'submitSurvey'])->name('enumerator.submit.survey');
+    Route::get('/enumerator/surveys/view/export', [EnumeratorController::class, 'exportAnswerSheet'])->name('enumerator.export.answer.sheet');
 });
 
 require __DIR__ . '/auth.php';

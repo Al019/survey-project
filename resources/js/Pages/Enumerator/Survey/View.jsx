@@ -32,7 +32,7 @@ const colors = [
   "#4dd0e1", // Light Cyan
 ];
 
-const tabs = ["Questions", "Responses"]
+const tabs = ["Questions", "Responses", "Settings"]
 
 const View = () => {
   const [activeTab, setActiveTab] = useState(tabs[0])
@@ -205,6 +205,12 @@ const View = () => {
         showToast("Submit response successfully.")
       }
     })
+  }
+
+  const handleExportAnswerSheet = () => {
+    window.open(route('enumerator.export.answer.sheet',
+      { survey_id: survey.id }
+    ), '_blank');
   }
 
   return (
@@ -410,6 +416,28 @@ const View = () => {
                   ))}
                 </div>
               )}
+            </TabPanel>
+            <TabPanel value="Settings">
+              <Card className="shadow-none border border-gray-200">
+                <CardBody className="space-y-4 max-sm:p-4">
+                  <h1 className="font-medium">Manage Survey</h1>
+                  <hr className="border-blue-gray-200" />
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <h1 className="font-normal text-sm">Answer Sheet</h1>
+                      <p className="text-xs font-normal">Import existing answers.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Button color="green" variant="outlined" size="sm">
+                        Import
+                      </Button>
+                      <Button onClick={handleExportAnswerSheet} variant="text" size="sm">
+                        Download format
+                      </Button>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
             </TabPanel>
           </TabsBody>
         </div>
