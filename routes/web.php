@@ -34,7 +34,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/surveys/create', [AdminController::class, 'surveyCreate'])->name('admin.survey.create');
     Route::post('/admin/surveys/create', [AdminController::class, 'publishSurvey'])->name('admin.publish.survey');
     Route::get('/admin/surveys/view', [AdminController::class, 'viewSurvey'])->name('admin.view.survey');
-    Route::post('/admin/surveys/view', [AdminController::class, 'assignEnumerator'])->name('admin.assign.enumerator');
+    Route::post('/admin/surveys/view/assign/enumerator', [AdminController::class, 'assignEnumerator'])->name('admin.assign.enumerator');
+    Route::post('/admin/surveys/view/delete/survey', [AdminController::class, 'deleteSurvey'])->name('admin.delete.survey');
 });
 
 Route::middleware(['auth', 'enumerator'])->group(function () {

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('surveys', function (Blueprint $table) {
             $table->id();
             $table->foreignId('admin_id')->constrained('users');
-            $table->string('title');
+            $table->longText('title');
             $table->longText('description')->nullable();
             $table->timestamps();
         });

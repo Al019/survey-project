@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import { useForm, usePage } from "@inertiajs/react"
-import { Button, Card, CardBody, CardHeader, Dialog, DialogBody, DialogFooter, DialogHeader, Option, Select, Switch, Tab, TabPanel, Tabs, TabsBody, TabsHeader, Textarea } from "@material-tailwind/react"
+import { router, useForm, usePage } from "@inertiajs/react"
+import { Button, Card, CardBody, CardFooter, CardHeader, Dialog, DialogBody, DialogFooter, DialogHeader, Option, Select, Switch, Tab, TabPanel, Tabs, TabsBody, TabsHeader, Textarea } from "@material-tailwind/react"
 import { useEffect, useRef, useState } from "react"
 import { IoMdRadioButtonOff, IoIosArrowDown } from "react-icons/io"
 import { IoCloseOutline } from "react-icons/io5"
@@ -14,30 +14,21 @@ import Modal from "@/Components/Modal"
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import InputError from "@/Components/InputError"
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 
 const colors = [
-  "#f44336", // Red
-  "#4caf50", // Green
-  "#2196f3", // Blue
-  "#ff9800", // Orange
-  "#3f51b5", // Indigo
-  "#e91e63", // Pink
-  "#00bcd4", // Cyan
-  "#8bc34a", // Light Green
-  "#ffeb3b", // Yellow
-  "#9c27b0", // Purple
-  "#ff5722", // Deep Orange
-  "#009688", // Teal
-  "#cddc39", // Lime
-  "#673ab7", // Deep Purple
-  "#ffc107", // Amber
-  "#03a9f4", // Light Blue
-  "#795548", // Brown
-  "#607d8b", // Blue Grey
-  "#f06292", // Light Pink
-  "#4dd0e1", // Light Cyan
+  "#f44336", "#4caf50", "#2196f3", "#ff9800", "#3f51b5",
+  "#e91e63", "#00bcd4", "#8bc34a", "#ffeb3b", "#9c27b0",
+  "#ff5722", "#009688", "#cddc39", "#673ab7", "#ffc107",
+  "#03a9f4", "#795548", "#607d8b", "#f06292", "#4dd0e1",
+  "#d32f2f", "#388e3c", "#1976d2", "#f57c00", "#303f9f",
+  "#c2185b", "#00796b", "#afb42b", "#512da8", "#ffa000",
+  "#0288d1", "#5d4037", "#455a64", "#ec407a", "#26c6da",
+  "#ff1744", "#00e676", "#2979ff", "#ff9100", "#6200ea",
+  "#00acc1", "#8e24aa", "#ffea00", "#76ff03", "#d500f9",
+  "#ff3d00", "#1de9b6", "#ff6d00", "#ff4081"
 ];
 
 const tabs = ["Questions", "Responses", "Assignments", "Settings"]
@@ -46,7 +37,8 @@ const View = () => {
   const [activeTab, setActiveTab] = useState(tabs[0])
   const { survey, responses, notAssignEnumerators, assignEnumerators } = usePage().props
   const [open, setOpen] = useState(false)
-  const { post, processing } = useForm()
+  const [openDelete, setOpenDelete] = useState(false)
+  const { post, data, setData, errors, processing } = useForm()
 
   const pieChartConfig = (series, labels) => {
     const total = series.reduce((sum, value) => sum + value, 0);
@@ -144,6 +136,12 @@ const View = () => {
     post(route('admin.assign.enumerator', {
       survey_id: survey.id,
       enumerator_id: enumerator.id,
+    }))
+  }
+
+  const handleDeleteSurvey = () => {
+    post(route('admin.delete.survey', {
+      survey_id: survey.id,
     }))
   }
 
@@ -255,14 +253,48 @@ const View = () => {
             <TabPanel value="Assignments">
               <Tbl title="Enumerators" data={dataTableAssignEnumerator} />
             </TabPanel>
+            <TabPanel value="Settings">
+              <Card className="shadow-none border border-gray-200">
+                <CardBody className="space-y-4 max-sm:p-4">
+                  <h1 className="font-medium">Manage Survey</h1>
+                  <hr className="border-blue-gray-200" />
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <h1 className="font-normal text-sm">Delete this survey</h1>
+                      <p className="text-xs font-normal">Once you delete a survey, there is no going back. Please be certain.</p>
+                    </div>
+                    <Button onClick={() => setOpenDelete(true)} variant="outlined" size="sm" color="red">
+                      Delete survey
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            </TabPanel>
           </TabsBody>
         </div>
 
         <Modal size="md" open={open} onClose={() => setOpen(false)}>
           <Card className="shadow-none">
             <CardBody className="p-0">
-              <Tbl title="Enumerators" data={dataTableNotAssignEnumerator} onClickAssign={handleAssignEnumerator} />
+              <Tbl title="Enumerators" data={dataTableNotAssignEnumerator} onClickAssign={handleAssignEnumerator} btnLoading={processing} />
             </CardBody>
+          </Card>
+        </Modal>
+
+        <Modal size="sm" open={openDelete} onClose={() => setOpenDelete(false)}>
+          <Card className="shadow-none">
+            <CardHeader shadow={false} floated={false} className="text-lg font-semibold">
+              Confirm your password
+            </CardHeader>
+            <CardBody>
+              <Inpt value={data.password} onChange={(e) => setData("password", e.target.value)} label="Password" type="password" />
+              <InputError message={errors.password} className="mt-1" />
+            </CardBody>
+            <CardFooter>
+              <Button onClick={handleDeleteSurvey} color="red" disabled={processing} fullWidth>
+                Delete this survey
+              </Button>
+            </CardFooter>
           </Card>
         </Modal>
       </AuthenticatedLayout>

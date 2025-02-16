@@ -10,26 +10,16 @@ import { useToast } from "@/Contexts/ToastContext";
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 
 const colors = [
-  "#f44336", // Red
-  "#4caf50", // Green
-  "#2196f3", // Blue
-  "#ff9800", // Orange
-  "#3f51b5", // Indigo
-  "#e91e63", // Pink
-  "#00bcd4", // Cyan
-  "#8bc34a", // Light Green
-  "#ffeb3b", // Yellow
-  "#9c27b0", // Purple
-  "#ff5722", // Deep Orange
-  "#009688", // Teal
-  "#cddc39", // Lime
-  "#673ab7", // Deep Purple
-  "#ffc107", // Amber
-  "#03a9f4", // Light Blue
-  "#795548", // Brown
-  "#607d8b", // Blue Grey
-  "#f06292", // Light Pink
-  "#4dd0e1", // Light Cyan
+  "#f44336", "#4caf50", "#2196f3", "#ff9800", "#3f51b5",
+  "#e91e63", "#00bcd4", "#8bc34a", "#ffeb3b", "#9c27b0",
+  "#ff5722", "#009688", "#cddc39", "#673ab7", "#ffc107",
+  "#03a9f4", "#795548", "#607d8b", "#f06292", "#4dd0e1",
+  "#d32f2f", "#388e3c", "#1976d2", "#f57c00", "#303f9f",
+  "#c2185b", "#00796b", "#afb42b", "#512da8", "#ffa000",
+  "#0288d1", "#5d4037", "#455a64", "#ec407a", "#26c6da",
+  "#ff1744", "#00e676", "#2979ff", "#ff9100", "#6200ea",
+  "#00acc1", "#8e24aa", "#ffea00", "#76ff03", "#d500f9",
+  "#ff3d00", "#1de9b6", "#ff6d00", "#ff4081"
 ];
 
 const tabs = ["Questions", "Responses", "Settings"]
@@ -262,38 +252,39 @@ const View = () => {
                       <h1 className="text-sm font-medium">{question.text}</h1>
                     </div>
                     {(question.type === 'radio' || question.type === 'checkbox') && (
-                      <div className="grid grid-cols-2 max-sm:grid-cols-1">
+                      <div className="grid grid-cols-2 gap-1 max-sm:grid-cols-1">
                         {question.option.map((option, oIndex) => {
                           if (question.type === 'radio') {
                             return (
-                              <Radio
-                                key={oIndex}
-                                name={`radio_${qIndex}`}
-                                label={option.text}
-                                color="green"
-                                checked={answer.some(
-                                  (ans) =>
-                                    ans.questionId === question.id &&
-                                    ans.option.some((opt) => opt.optionId === option.id)
-                                )}
-                                onChange={() => handleAnswerChange(question.id, option)}
-                                labelProps={{ className: "font-normal text-sm" }}
-                              />
+                              <label key={oIndex} className="flex items-center cursor-pointer">
+                                <Radio
+                                  id={`radio-${question.id}-${option.id}`}
+                                  color="green"
+                                  checked={answer.some(
+                                    (ans) =>
+                                      ans.questionId === question.id &&
+                                      ans.option.some((opt) => opt.optionId === option.id)
+                                  )}
+                                  onChange={() => handleAnswerChange(question.id, option)}
+                                />
+                                <span className="font-normal text-sm">{option.text}</span>
+                              </label>
                             )
                           } else if (question.type === 'checkbox') {
                             return (
-                              <Checkbox
-                                key={oIndex}
-                                label={option.text}
-                                color="green"
-                                checked={answer.some(
-                                  (ans) =>
-                                    ans.questionId === question.id &&
-                                    ans.option.some((opt) => opt.optionId === option.id)
-                                )}
-                                onChange={(e) => handleCheckboxChange(question.id, option, e.target.checked)}
-                                labelProps={{ className: "font-normal text-sm" }}
-                              />
+                              <label key={oIndex} className="flex items-center cursor-pointer">
+                                <Checkbox
+                                  id={`checkbox-${question.id}-${option.id}`}
+                                  color="green"
+                                  checked={answer.some(
+                                    (ans) =>
+                                      ans.questionId === question.id &&
+                                      ans.option.some((opt) => opt.optionId === option.id)
+                                  )}
+                                  onChange={(e) => handleCheckboxChange(question.id, option, e.target.checked)}
+                                />
+                                <span className="font-normal text-sm">{option.text}</span>
+                              </label>
                             )
                           }
                         })}

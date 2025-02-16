@@ -116,7 +116,7 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
                         </td>
                       )}
                       {onClickAssign && (
-                        <td className="p-4 cursor-pointer">
+                        <td className="p-4">
                           <Button onClick={() => onClickAssign(record)} size="sm" color="green" disabled={btnLoading}>
                             Assign
                           </Button>

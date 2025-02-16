@@ -132,12 +132,21 @@ class EnumeratorController extends Controller
         $sheet->getStyle('A:B')->getProtection()->setLocked(Protection::PROTECTION_PROTECTED);
         $sheet->getStyle('C:D')->getProtection()->setLocked(Protection::PROTECTION_UNPROTECTED);
 
+        // Question Type Mapping
+        $typeMapping = [
+            'input' => 'Open ended',
+            'radio' => 'Multiple choice',
+            'select' => 'Dropdown',
+            'checkbox' => 'Checkboxes',
+        ];
+
         $row = 2;
         $optionRow = 1; // Start row for options
 
         foreach ($survey->question as $question) {
+            $questionType = $typeMapping[$question->type] ?? ucfirst($question->type);
             $sheet->setCellValue("A{$row}", $question->id);
-            $sheet->setCellValue("B{$row}", ucfirst($question->type)); // Capitalized type
+            $sheet->setCellValue("B{$row}", $questionType); // Use mapped question type
             $sheet->setCellValue("C{$row}", $question->text);
 
             if (in_array($question->type, ['radio', 'select', 'checkbox', 'multi-select']) && count($question->option) > 0) {
@@ -207,4 +216,5 @@ class EnumeratorController extends Controller
 
         return response()->download($filePath, $fileName)->deleteFileAfterSend();
     }
+
 }

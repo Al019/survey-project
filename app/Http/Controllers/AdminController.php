@@ -146,4 +146,17 @@ class AdminController extends Controller
             'enumerator_id' => $request->enumerator_id,
         ]);
     }
+
+    public function deleteSurvey(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $survey = Survey::findOrFail($request->survey_id);
+
+        $survey->delete();
+
+        return redirect(route('admin.survey.list'));
+    }
 }
