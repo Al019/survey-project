@@ -212,15 +212,21 @@ const View = () => {
                                   </div>
                                   <div className="space-y-2 flex flex-col justify-center items-start">
                                     {question.option.map((option, oIndex) => {
+                                      const counts = series[oIndex]
                                       return (
-                                        <div key={oIndex} className="flex items-center gap-2">
-                                          <div>
-                                            <div
-                                              style={{ backgroundColor: colors[oIndex] }}
-                                              className="size-4 rounded-full"
-                                            ></div>
+                                        <div key={oIndex} className="w-full flex justify-between items-center gap-2">
+                                          <div className="flex items-center gap-2">
+                                            <div>
+                                              <div
+                                                style={{ backgroundColor: colors[oIndex] }}
+                                                className="size-4 rounded-full"
+                                              ></div>
+                                            </div>
+                                            <p className="text-sm font-normal">{option.text}</p>
                                           </div>
-                                          <p className="text-sm font-normal">{option.text}</p>
+                                          <div>
+                                            <span>{counts}</span>
+                                          </div>
                                         </div>
                                       );
                                     })}

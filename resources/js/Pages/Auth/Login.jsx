@@ -38,9 +38,9 @@ const Login = () => {
                                 onChange={(e) =>
                                     setData('remember', e.target.checked)
                                 } color="green" label="Remember Me" labelProps={{ className: "text-sm font-normal text-blue-gray-500" }} />
-                            <Link href={route('password.request')}>
+                            {/* <Link href={route('password.request')}>
                                 <span className="text-blue-gray-500 text-sm cursor-pointer hover:underline hover:text-green-500">Forgot Password?</span>
-                            </Link>
+                            </Link> */}
                         </div>
                     </div>
                 </div>

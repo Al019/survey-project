@@ -29,7 +29,7 @@ const SideBar = () => {
             </div>
           </div>
           <List>
-            <Chip value={user.role === 'admin' && 'Administrator' || user.role === 'enumerator' && 'Enumerator'} variant="ghost" className="w-fit mb-4" color="green" />
+            <Chip value={user.role === 'admin' && 'Administrator' || user.role === 'enumerator' && 'Enumerator'} variant="outlined" className="w-fit mb-4" color="green" />
             <Accordion open={open === 1} icon={<ChevronDownIcon strokeWidth={2.5} className={`mx-auto h-4 w-4 transition-transform ${open === 1 ? "rotate-180" : ""}`} />}>
               <ListItem className="p-0">
                 <AccordionHeader onClick={() => handleOpen(1)} className="border-b-0 p-3">
@@ -43,7 +43,7 @@ const SideBar = () => {
               </ListItem>
               <AccordionBody className="py-1">
                 <List className="p-0">
-                  <NavLink onClick={closeSidebar} href={route('profile.information')} active={route().current('profile.information')} label='My Profile'>
+                  <NavLink onClick={closeSidebar} href={route('profile.information')} active={location.pathname.startsWith('/profile')} label='My Profile'>
                     <ListItemPrefix>
                       <ChevronRightIcon strokeWidth={2.5} className="h-3.5 w-3.5" />
                     </ListItemPrefix>
@@ -60,21 +60,21 @@ const SideBar = () => {
             {user.role === 'admin' && (
               <div className="space-y-2">
                 <div>
-                  <NavLink onClick={closeSidebar} href={route('admin.dashboard')} active={route().current('admin.dashboard')} label='Dashboard'>
+                  <NavLink onClick={closeSidebar} href={route('admin.dashboard')} active={location.pathname.startsWith('/admin/dashboard')} label='Dashboard'>
                     <ListItemPrefix>
                       <PresentationChartLineIcon className="h-5 w-5" />
                     </ListItemPrefix>
                   </NavLink>
                 </div>
                 <div>
-                  <NavLink onClick={closeSidebar} href={route('admin.enumerator.list')} active={route().current('admin.enumerator.*')} label='Enumerators'>
+                  <NavLink onClick={closeSidebar} href={route('admin.enumerator.list')} active={location.pathname.startsWith('/admin/enumerators')} label='Enumerators'>
                     <ListItemPrefix>
                       <UsersIcon className="h-5 w-5" />
                     </ListItemPrefix>
                   </NavLink>
                 </div>
                 <div>
-                  <NavLink onClick={closeSidebar} href={route('admin.survey.list')} active={route().current('admin.survey.*')} label='Surveys'>
+                  <NavLink onClick={closeSidebar} href={route('admin.survey.list')} active={location.pathname.startsWith('/admin/surveys')} label='Surveys'>
                     <ListItemPrefix>
                       <DocumentDuplicateIcon className="h-5 w-5" />
                     </ListItemPrefix>
@@ -85,14 +85,14 @@ const SideBar = () => {
             {user.role === 'enumerator' && (
               <div className="space-y-2">
                 <div>
-                  <NavLink onClick={closeSidebar} href={route('enumerator.dashboard')} active={route().current('enumerator.dashboard')} label='Dashboard'>
+                  <NavLink onClick={closeSidebar} href={route('enumerator.dashboard')} active={location.pathname.startsWith('/enumerator/dashboard')} label='Dashboard'>
                     <ListItemPrefix>
                       <PresentationChartLineIcon className="h-5 w-5" />
                     </ListItemPrefix>
                   </NavLink>
                 </div>
                 <div>
-                  <NavLink onClick={closeSidebar} href={route('enumerator.survey.list')} active={route().current('enumerator.survey.*')} label='Surveys'>
+                  <NavLink onClick={closeSidebar} href={route('enumerator.survey.list')} active={location.pathname.startsWith('/enumerator/surveys')} label='Surveys'>
                     <ListItemPrefix>
                       <DocumentDuplicateIcon className="h-5 w-5" />
                     </ListItemPrefix>

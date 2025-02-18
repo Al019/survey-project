@@ -21,6 +21,7 @@ const Create = () => {
   const [file, setFile] = useState(null)
   const [open, setOpen] = useState(false)
   const { post, processing } = useForm()
+  const [process, setProcess] = useState(false)
 
   const [survey, setSurvey] = useState(() => {
     const savedSurvey = localStorage.getItem("create-survey")
@@ -33,14 +34,60 @@ const Create = () => {
     }
   })
 
-  const handlePublish = () => {
-    post(route('admin.publish.survey', survey), {
-      onSuccess: () => {
-        localStorage.removeItem("create-survey")
-        router.visit(route('admin.survey.list'))
-      }
+  const chunkArray = (array, chunkSize) => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    console.log("Chunks:", chunks); // Debugging: Log the chunks
+    return chunks;
+  };
+
+  const handlePublish = async () => {
+    setProcess(true)
+    const surveyData = {
+      title: survey.title,
+      description: survey.description,
+    };
+
+    // Send the survey data to create the survey
+    post(route('admin.create.survey', surveyData), {
+      onSuccess: (response) => {
+        const survey_id = response.props.survey.id; // Assuming the backend returns the survey ID
+
+        // Step 2: Split questions into chunks of 10
+        const chunkSize = 5;
+        const questionChunks = chunkArray(survey.questions, chunkSize);
+
+        // Step 3: Function to send chunks at intervals
+        const sendChunksWithInterval = (index) => {
+          if (index < questionChunks.length) {
+            post(route('admin.publish.survey', { survey_id, questions: questionChunks[index] }), {
+              onSuccess: () => {
+                console.log(`Chunk ${index + 1} of ${questionChunks.length} sent successfully.`);
+                setTimeout(() => sendChunksWithInterval(index + 1), 500); // Delay of 1 second before sending the next chunk
+              },
+              onError: (error) => {
+                console.error(`Error sending chunk ${index + 1}:`, error);
+              },
+            });
+          } else {
+            setProcess(false)
+            localStorage.removeItem("create-survey");
+            router.visit(route('admin.survey.list'));
+          }
+        };
+
+        // Start sending chunks
+        sendChunksWithInterval(0);
+      },
+      onError: (error) => {
+        setProcess(false)
+        console.error("Error creating survey:", error);
+      },
     });
-  }
+  };
+
 
   useEffect(() => {
     localStorage.setItem("create-survey", JSON.stringify(survey))
@@ -174,7 +221,7 @@ const Create = () => {
   return (
     <Tabs value={activeTab}>
       <AuthenticatedLayout title={survey.title} button={
-        <Button onClick={handlePublish} color="green" disabled={processing} className={activeTab !== tabs[0] ? 'hidden' : ''}>
+        <Button onClick={handlePublish} color="green" disabled={process} loading={process} className={activeTab !== tabs[0] ? 'hidden' : ''}>
           Publish
         </Button>
       } tab={

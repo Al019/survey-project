@@ -30,9 +30,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/enumerators', [AdminController::class, 'enumeratorList'])->name('admin.enumerator.list');
     Route::post('/admin/enumerators', [AdminController::class, 'addEnumerator'])->name('admin.add.enumerator');
+    Route::get('/admin/enumerators/view', [AdminController::class, 'viewEnumerator'])->name('admin.view.enumerator');
+    Route::post('/admin/enumerators/view', [AdminController::class, 'deleteEnumerator'])->name('admin.delete.enumerator');
     Route::get('/admin/surveys', [AdminController::class, 'surveyList'])->name('admin.survey.list');
     Route::get('/admin/surveys/create', [AdminController::class, 'surveyCreate'])->name('admin.survey.create');
-    Route::post('/admin/surveys/create', [AdminController::class, 'publishSurvey'])->name('admin.publish.survey');
+    Route::post('/admin/surveys/create', [AdminController::class, 'createSurvey'])->name('admin.create.survey');
+    Route::post('/admin/surveys/publish', [AdminController::class, 'publishSurvey'])->name('admin.publish.survey');
     Route::get('/admin/surveys/view', [AdminController::class, 'viewSurvey'])->name('admin.view.survey');
     Route::post('/admin/surveys/view/assign/enumerator', [AdminController::class, 'assignEnumerator'])->name('admin.assign.enumerator');
     Route::post('/admin/surveys/view/delete/survey', [AdminController::class, 'deleteSurvey'])->name('admin.delete.survey');
@@ -42,8 +45,9 @@ Route::middleware(['auth', 'enumerator'])->group(function () {
     Route::get('/enumerator/dashboard', [EnumeratorController::class, 'dashboard'])->name('enumerator.dashboard');
     Route::get('/enumerator/surveys', [EnumeratorController::class, 'surveyList'])->name('enumerator.survey.list');
     Route::get('/enumerator/surveys/view', [EnumeratorController::class, 'viewSurvey'])->name('enumerator.view.survey');
-    Route::post('/enumerator/surveys/view', [EnumeratorController::class, 'submitSurvey'])->name('enumerator.submit.survey');
-    Route::get('/enumerator/surveys/view/export', [EnumeratorController::class, 'exportAnswerSheet'])->name('enumerator.export.answer.sheet');
+    Route::post('/enumerator/surveys/view', [EnumeratorController::class, 'submitResponse'])->name('enumerator.submit.response');
+    Route::post('/enumerator/surveys/submit/answer', [EnumeratorController::class, 'submitAnswer'])->name('enumerator.submit.answer');
+    Route::get('/enumerator/surveys/export/answer/sheet', [EnumeratorController::class, 'exportAnswerSheet'])->name('enumerator.export.answer.sheet');
 });
 
 require __DIR__ . '/auth.php';

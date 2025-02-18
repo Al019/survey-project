@@ -21,7 +21,7 @@ class Enumerator
         }
 
         if (Auth::user()->role !== 'enumerator') {
-            return abort(403);
+            abort(403);
         }
 
         return $next($request);

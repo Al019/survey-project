@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { SidebarProvider } from './Contexts/SidebarContext';
 import { ToastProvider } from './Contexts/ToastContext';
 import { SecurityProvider } from './Contexts/SecurityContext';
+import { ProgressProvider } from './Contexts/ProgressContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -24,7 +25,9 @@ createInertiaApp({
             <SidebarProvider>
                 <ToastProvider>
                     <SecurityProvider>
-                    <App {...props} />
+                        <ProgressProvider>
+                            <App {...props} />
+                        </ProgressProvider>
                     </SecurityProvider>
                 </ToastProvider>
             </SidebarProvider>

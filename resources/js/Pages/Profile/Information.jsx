@@ -30,7 +30,7 @@ const Information = () => {
 
   return (
     <Tabs value={activeTab}>
-      <AuthenticatedLayout title="Profile" button={
+      <AuthenticatedLayout title="My Profile" button={
         <Button onClick={handleSave} color="green" disabled={processing} className={activeTab !== tabs[1] ? 'hidden' : ''}>
           Save Changes
         </Button>

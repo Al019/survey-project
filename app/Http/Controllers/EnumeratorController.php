@@ -73,18 +73,49 @@ class EnumeratorController extends Controller
         ]);
     }
 
-    public function submitSurvey(Request $request)
+    public function submitResponse(Request $request)
     {
         $user_id = auth()->user()->id;
 
-        $reponse = Response::create([
-            'survey_id' => $request->survey_id,
+        $survey = Survey::where('id', $request->survey_id)
+            ->whereHas('survey_assignment', function ($query) use ($user_id) {
+                $query->where('enumerator_id', $user_id);
+            })
+            ->withCount([
+                'response as total_response_count',
+                'response as enumerator_response_count' => function ($query) use ($user_id) {
+                    $query->where('enumerator_id', $user_id);
+                }
+            ])
+            ->with('question.option')
+            ->first();
+
+        if (!$survey) {
+            abort(404);
+        }
+
+        $responses = Response::where('survey_id', $survey->id)
+            ->where('enumerator_id', $user_id)
+            ->with('answer.answer_option')
+            ->get();
+
+        $response = Response::create([
+            'survey_id' => $survey->id,
             'enumerator_id' => $user_id,
         ]);
 
+        return Inertia::render('Enumerator/Survey/View', [
+            'survey' => $survey,
+            'responses' => $responses,
+            'response' => $response,
+        ]);
+    }
+
+    public function submitAnswer(Request $request)
+    {
         foreach ($request['answer'] as $answerData) {
-            $answer = Answer::create([
-                'response_id' => $reponse->id,
+            $answer = Answer::create(attributes: [
+                'response_id' => $request->response_id,
                 'question_id' => $answerData['questionId'],
                 'text' => is_array($answerData['text']) ? implode(', ', $answerData['text']) : $answerData['text'],
             ]);

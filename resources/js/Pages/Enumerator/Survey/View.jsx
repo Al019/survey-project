@@ -6,6 +6,7 @@ import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useToast } from "@/Contexts/ToastContext";
+import { useProgress } from "@/Contexts/ProgressContext";
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 
@@ -29,8 +30,9 @@ const View = () => {
   const { survey, responses } = usePage().props
   const [answer, setAnswer] = useState([])
   const [validationErrors, setValidationErrors] = useState([])
-  const { post, processing } = useForm();
+  const { post } = useForm()
   const { showToast } = useToast()
+  const { setProgress } = useProgress()
 
   useEffect(() => {
     const savedAnswers = localStorage.getItem(`answers_${survey.id}`)
@@ -60,10 +62,10 @@ const View = () => {
             display: false,
           },
           tooltip: {
-            enabled: false, // Disable tooltips
+            enabled: false,
           },
           datalabels: {
-            color: '#fff', // Set text color
+            color: '#fff',
             anchor: 'center',
             align: 'center',
             font: {
@@ -71,7 +73,7 @@ const View = () => {
             },
             formatter: (value, context) => {
               let percentage = ((value / total) * 100).toFixed(2);
-              return percentage > 0 ? `${percentage}%` : ''; // Hide 0% values
+              return percentage > 0 ? `${percentage}%` : '';
             },
           },
         },
@@ -175,8 +177,16 @@ const View = () => {
     })
   }
 
+  const chunkArray = (array, chunkSize) => {
+    const chunks = []
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize))
+    }
+    return chunks
+  }
+
   const handleSubmit = async () => {
-    const requiredQuestions = survey.question.filter(q => q.required === 1);
+    const requiredQuestions = survey.question.filter(q => q.required === 1)
     const unansweredQuestions = requiredQuestions.filter(q => !answer.some(a => a.questionId === q.id))
 
     if (unansweredQuestions.length > 0) {
@@ -184,15 +194,32 @@ const View = () => {
       return
     }
 
-    post(route('enumerator.submit.survey', {
-      survey_id: survey.id,
-      answer
-    }), {
-      onSuccess: () => {
-        localStorage.removeItem(`answers_${survey.id}`)
-        setAnswer([])
-        setValidationErrors([])
-        showToast("Submit response successfully.")
+    setProgress(true)
+
+    post(route('enumerator.submit.response', { survey_id: survey.id }), {
+      onSuccess: (res) => {
+        const response_id = res.props.response.id;
+        const chunkSize = 10
+        const answerChunks = chunkArray(answer, chunkSize)
+        const submitChunksWithInterval = (index) => {
+          if (index < answerChunks.length) {
+            post(route('enumerator.submit.answer', {
+              response_id: response_id,
+              answer: answerChunks[index]
+            }), {
+              onSuccess: () => {
+                setTimeout(() => submitChunksWithInterval(index + 1), 1000)
+              }
+            })
+          } else {
+            setProgress(false)
+            localStorage.removeItem(`answers_${survey.id}`)
+            setAnswer([])
+            setValidationErrors([])
+            showToast("Submit response successfully.")
+          }
+        }
+        submitChunksWithInterval(0)
       }
     })
   }
@@ -200,13 +227,13 @@ const View = () => {
   const handleExportAnswerSheet = () => {
     window.open(route('enumerator.export.answer.sheet',
       { survey_id: survey.id }
-    ), '_blank');
+    ), '_blank')
   }
 
   return (
     <Tabs value={activeTab}>
       <AuthenticatedLayout title={survey.title} button={
-        <Button onClick={handleSubmit} color="green" disabled={processing} className={activeTab !== tabs[0] ? 'hidden' : ''}>
+        <Button onClick={handleSubmit} color="green" className={activeTab !== tabs[0] ? 'hidden' : ''}>
           Submit
         </Button>
       } tab={
@@ -358,9 +385,8 @@ const View = () => {
                         {(question.type === 'radio' || question.type === 'select' || question.type === 'checkbox') && (
                           <div>
                             {(() => {
-                              const { series, labels } = calculateResponseData(question);
-                              const chartData = pieChartConfig(series, labels);
-
+                              const { series, labels } = calculateResponseData(question)
+                              const chartData = pieChartConfig(series, labels)
                               return (
                                 <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
                                   <div className="flex items-center justify-center">
@@ -370,15 +396,21 @@ const View = () => {
                                   </div>
                                   <div className="space-y-2 flex flex-col justify-center items-start">
                                     {question.option.map((option, oIndex) => {
+                                      const counts = series[oIndex]
                                       return (
-                                        <div key={oIndex} className="flex items-center gap-2">
-                                          <div>
-                                            <div
-                                              style={{ backgroundColor: colors[oIndex] }}
-                                              className="size-4 rounded-full"
-                                            ></div>
+                                        <div key={oIndex} className="w-full flex justify-between items-center gap-2">
+                                          <div className="flex items-center gap-2">
+                                            <div>
+                                              <div
+                                                style={{ backgroundColor: colors[oIndex] }}
+                                                className="size-4 rounded-full"
+                                              ></div>
+                                            </div>
+                                            <p className="text-sm font-normal">{option.text}</p>
                                           </div>
-                                          <p className="text-sm font-normal">{option.text}</p>
+                                          <div>
+                                            <span>{counts}</span>
+                                          </div>
                                         </div>
                                       );
                                     })}
@@ -408,17 +440,17 @@ const View = () => {
                 </div>
               )}
             </TabPanel>
-            <TabPanel value="Settings">
+            <TabPanel value="Settings" className="max-sm:p-2">
               <Card className="shadow-none border border-gray-200">
                 <CardBody className="space-y-4 max-sm:p-4">
                   <h1 className="font-medium">Manage Survey</h1>
                   <hr className="border-blue-gray-200" />
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center gap-2">
                     <div className="space-y-1">
                       <h1 className="font-normal text-sm">Answer Sheet</h1>
                       <p className="text-xs font-normal">Import existing answers.</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <Button color="green" variant="outlined" size="sm">
                         Import
                       </Button>

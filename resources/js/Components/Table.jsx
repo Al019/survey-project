@@ -10,7 +10,7 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
     setFilteredData(data.tbodies)
   }, [data])
 
-  const recordPerPage = 10
+  const recordPerPage = 100
   const lastIndex = currentPage * recordPerPage
   const firstIndex = lastIndex - recordPerPage
   const records = filteredData.slice(firstIndex, lastIndex)

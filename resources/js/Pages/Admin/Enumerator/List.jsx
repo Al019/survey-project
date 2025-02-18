@@ -3,7 +3,7 @@ import Inpt from '@/Components/Input'
 import Tbl from '@/Components/Table'
 import Modal from '@/Components/Modal'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import { useForm, usePage } from '@inertiajs/react'
+import { router, useForm, usePage } from '@inertiajs/react'
 import { Button, Card, CardBody, CardFooter, CardHeader, Option, Select } from '@material-tailwind/react'
 import { useState } from 'react'
 
@@ -45,6 +45,10 @@ const List = () => {
     }))
   }
 
+  const handleNavigate = (enumerator_id) => {
+    router.visit(route('admin.view.enumerator', { enumerator_id }))
+  }
+
   return (
     <AuthenticatedLayout title="Enumerators" button={
       <Button color='green' onClick={() => setOpen(true)}>
@@ -52,7 +56,7 @@ const List = () => {
       </Button>
     }>
       <div className='p-4 max-sm:p-2 mt-[80px]'>
-        <Tbl title="Enumerators" data={dataTable} />
+        <Tbl title="Enumerators" idKey="id" data={dataTable} onClickView={handleNavigate} />
       </div>
       <Modal size="md" open={open} onClose={() => setOpen(false)}>
         <Card className='shadow-none'>

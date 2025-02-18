@@ -55,6 +55,34 @@ class AdminController extends Controller
         // Mail::to($request->email)->send(new PasswordMail($password));
     }
 
+    public function viewEnumerator(Request $request)
+    {
+        $enumerator = User::where("id", $request->enumerator_id)
+            ->where("role", "enumerator")
+            ->first();
+
+        if (!$enumerator) {
+            abort(404);
+        }
+
+        return Inertia::render('Admin/Enumerator/View', [
+            'enumerator' => $enumerator,
+        ]);
+    }
+
+    public function deleteEnumerator(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $enumerator = User::findOrFail($request->enumerator_id);
+
+        $enumerator->delete();
+
+        return redirect(route('admin.enumerator.list'));
+    }
+
     public function surveyList()
     {
         $surveys = Survey::withCount('response', 'survey_assignment as assign_count')
@@ -71,7 +99,7 @@ class AdminController extends Controller
         return Inertia::render('Admin/Survey/Create');
     }
 
-    public function publishSurvey(Request $request)
+    public function createSurvey(Request $request)
     {
         $user_id = auth()->user()->id;
 
@@ -79,12 +107,18 @@ class AdminController extends Controller
             "admin_id" => $user_id,
             "title" => $request["title"] ?? "Untitled form",
             "description" => $request["description"],
-            "limit" => $request["limit"],
         ]);
 
+        return Inertia::render('Admin/Survey/Create', [
+            'survey' => $survey,
+        ]);
+    }
+
+    public function publishSurvey(Request $request)
+    {
         foreach ($request["questions"] as $questionData) {
             $question = Question::create([
-                'survey_id' => $survey->id,
+                'survey_id' => $request->survey_id,
                 'text' => $questionData['text'],
                 'type' => $questionData['type'],
                 'required' => $questionData['required'],
