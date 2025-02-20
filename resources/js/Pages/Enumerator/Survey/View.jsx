@@ -185,18 +185,30 @@ const View = () => {
     return chunks
   }
 
+  const scrollToFirstUnansweredQuestion = (unansweredQuestions) => {
+    if (unansweredQuestions.length > 0) {
+      const firstUnansweredQuestionId = unansweredQuestions[0].id;
+      const questionElement = document.getElementById(`question-${firstUnansweredQuestionId}`);
+      if (questionElement) {
+        questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+
   const handleSubmit = async () => {
     const requiredQuestions = survey.question.filter(q => q.required === 1)
     const unansweredQuestions = requiredQuestions.filter(q => !answer.some(a => a.questionId === q.id))
 
     if (unansweredQuestions.length > 0) {
       setValidationErrors(unansweredQuestions.map(q => q.id))
+      scrollToFirstUnansweredQuestion(unansweredQuestions)
       return
     }
 
     setProgress(true)
 
     post(route('enumerator.submit.response', { survey_id: survey.id }), {
+      preserveState: true,
       onSuccess: (res) => {
         const response_id = res.props.response.id;
         const chunkSize = 10
@@ -207,6 +219,7 @@ const View = () => {
               response_id: response_id,
               answer: answerChunks[index]
             }), {
+              preserveState: true,
               onSuccess: () => {
                 setTimeout(() => submitChunksWithInterval(index + 1), 1000)
               }
@@ -272,7 +285,7 @@ const View = () => {
                 </CardBody>
               </Card>
               {survey.question.map((question, qIndex) => (
-                <Card key={qIndex} className={`shadow-none ${validationErrors.includes(question.id) ? 'border-2 border-red-500' : 'border border-gray-200'}`}>
+                <Card key={qIndex} id={`question-${question.id}`} className={`shadow-none ${validationErrors.includes(question.id) ? 'border-2 border-red-500' : 'border border-gray-200'}`}>
                   <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
                     <div className="space-y-3">
                       <span className="text-xs font-normal">Question {qIndex + 1} {question.required === 1 && <span className="text-red-500 text-sm">*</span>}</span>

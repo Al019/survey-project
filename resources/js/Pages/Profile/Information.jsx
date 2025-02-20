@@ -67,7 +67,7 @@ const Information = () => {
                       <span className='text-base font-semibold text-blue-gray-800'>
                         {user.first_name} {user.last_name}
                       </span>
-                      <Chip value={user.role === 'admin' && 'Administrator' || user.role === 'enumerator' && 'Enumerator'} variant="ghost" className="w-fit mb-4" color="green" />
+                      <Chip value={user.role === 'admin' && 'Administrator' || user.role === 'enumerator' && 'Enumerator' || user.role === 'viewer' && 'Viewer'} variant="outlined" className="w-fit mb-4" color="green" />
                     </div>
                   </div>
                 </CardBody>

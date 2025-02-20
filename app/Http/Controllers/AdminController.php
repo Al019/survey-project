@@ -11,6 +11,8 @@ use App\Models\User;
 use Hash;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AdminController extends Controller
 {
@@ -81,6 +83,42 @@ class AdminController extends Controller
         $enumerator->delete();
 
         return redirect(route('admin.enumerator.list'));
+    }
+
+    public function viewerList()
+    {
+        $viewers = User::where("role", "viewer")
+            ->get();
+
+        return Inertia::render('Admin/Viewer/List', [
+            'viewers' => $viewers
+        ]);
+    }
+
+    public function addViewer(Request $request)
+    {
+        $request->validate([
+            'last_name' => ['required'],
+            'first_name' => ['required'],
+            'gender' => ['required'],
+            'email' => ['required', 'email', 'unique:users'],
+        ]);
+
+        // $password = Str::random(8);
+
+        $password = "P@ssw0rd";
+
+        User::create([
+            "last_name" => $request->last_name,
+            "first_name" => $request->first_name,
+            "middle_name" => $request->middle_name,
+            "gender" => $request->gender,
+            "email" => $request->email,
+            'password' => Hash::make($password),
+            "role" => "viewer",
+        ]);
+
+        // Mail::to($request->email)->send(new PasswordMail($password));
     }
 
     public function surveyList()
@@ -192,5 +230,36 @@ class AdminController extends Controller
         $survey->delete();
 
         return redirect(route('admin.survey.list'));
+    }
+
+    public function exportResponse(Request $request)
+    {
+        $survey = Survey::where('id', $request->survey_id)->first();
+
+        $responses = Response::with('answer.question')->where('survey_id', $survey->id)->get();
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $questions = Question::where('survey_id', $survey->id)->get();
+
+        $columnHeaders = $questions->pluck('text')->toArray();
+        $sheet->fromArray($columnHeaders, null, 'A1');
+
+        $row = 2;
+        foreach ($responses as $response) {
+            $responseData = [];
+            foreach ($questions as $question) {
+                $answer = $response->answer->where('question_id', $question->id)->first();
+                $responseData[] = $answer ? $answer->text : '';
+            }
+            $sheet->fromArray($responseData, null, 'A' . $row++);
+        }
+
+        $fileName = $survey->title . ' ' . 'Responses.xlsx';
+        $filePath = storage_path("app/public/{$fileName}");
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        return response()->download($filePath, $fileName)->deleteFileAfterSend();
     }
 }

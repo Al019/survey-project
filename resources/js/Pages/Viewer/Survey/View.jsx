@@ -31,14 +31,12 @@ const colors = [
   "#ff3d00", "#1de9b6", "#ff6d00", "#ff4081"
 ];
 
-const tabs = ["Questions", "Responses", "Assignments", "Settings"]
+const tabs = ["Responses", "Assignments"]
 
 const View = () => {
   const [activeTab, setActiveTab] = useState(tabs[0])
-  const { survey, responses, notAssignEnumerators, assignEnumerators } = usePage().props
+  const { survey, responses, assignEnumerators } = usePage().props
   const [open, setOpen] = useState(false)
-  const [openDelete, setOpenDelete] = useState(false)
-  const { post, get, data, setData, errors, processing } = useForm()
 
   const pieChartConfig = (series, labels) => {
     const total = series.reduce((sum, value) => sum + value, 0);
@@ -122,35 +120,6 @@ const View = () => {
     }))
   }
 
-  const dataTableNotAssignEnumerator = {
-    theads: [
-      "Name",
-    ],
-    tbodies: notAssignEnumerators.map((enumerator) => ({
-      id: enumerator.id,
-      name: `${enumerator.first_name} ${enumerator.last_name}`,
-    }))
-  }
-
-  const handleAssignEnumerator = (enumerator) => {
-    post(route('admin.assign.enumerator', {
-      survey_id: survey.id,
-      enumerator_id: enumerator.id,
-    }))
-  }
-
-  const handleDeleteSurvey = () => {
-    post(route('admin.delete.survey', {
-      survey_id: survey.id,
-    }))
-  }
-
-  const handleExportResponse = () => {
-    window.open(route('admin.export.response',
-      { survey_id: survey.id }
-    ), '_blank')
-  };
-
   return (
     <Tabs value={activeTab}>
       <AuthenticatedLayout button={
@@ -192,9 +161,6 @@ const View = () => {
                       {responses.length}
                     </h1>
                   </div>
-                  <Button onClick={handleExportResponse} size="sm" variant="outlined" color="green">
-                    Export
-                  </Button>
                 </CardBody>
               </Card>
               {responses.length > 0 && (
@@ -268,50 +234,8 @@ const View = () => {
             <TabPanel value="Assignments">
               <Tbl title="Enumerators" data={dataTableAssignEnumerator} />
             </TabPanel>
-            <TabPanel value="Settings">
-              <Card className="shadow-none border border-gray-200">
-                <CardBody className="space-y-4 max-sm:p-4">
-                  <h1 className="font-medium">Manage Survey</h1>
-                  <hr className="border-blue-gray-200" />
-                  <div className="flex justify-between items-center">
-                    <div className="space-y-1">
-                      <h1 className="font-normal text-sm">Delete this survey</h1>
-                      <p className="text-xs font-normal">Once you delete a survey, there is no going back. Please be certain.</p>
-                    </div>
-                    <Button onClick={() => setOpenDelete(true)} variant="outlined" size="sm" color="red">
-                      Delete survey
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
-            </TabPanel>
           </TabsBody>
         </div>
-
-        <Modal size="md" open={open} onClose={() => setOpen(false)}>
-          <Card className="shadow-none">
-            <CardBody className="p-0">
-              <Tbl title="Enumerators" data={dataTableNotAssignEnumerator} onClickAssign={handleAssignEnumerator} btnLoading={processing} />
-            </CardBody>
-          </Card>
-        </Modal>
-
-        <Modal size="sm" open={openDelete} onClose={() => setOpenDelete(false)}>
-          <Card className="shadow-none">
-            <CardHeader shadow={false} floated={false} className="text-lg font-semibold">
-              Confirm your password
-            </CardHeader>
-            <CardBody>
-              <Inpt value={data.password} onChange={(e) => setData("password", e.target.value)} label="Password" type="password" />
-              <InputError message={errors.password} className="mt-1" />
-            </CardBody>
-            <CardFooter>
-              <Button onClick={handleDeleteSurvey} color="red" disabled={processing} fullWidth>
-                Delete this survey
-              </Button>
-            </CardFooter>
-          </Card>
-        </Modal>
       </AuthenticatedLayout>
     </Tabs>
   )

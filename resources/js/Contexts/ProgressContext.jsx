@@ -1,5 +1,7 @@
 import Modal from '@/Components/Modal';
+import { Spinner } from '@material-tailwind/react';
 import { createContext, useContext, useState } from 'react';
+import Logo from '../../../public/images/logo.png'
 
 const ProgressContext = createContext();
 
@@ -12,10 +14,9 @@ export const ProgressProvider = ({ children }) => {
     <ProgressContext.Provider value={{ setProgress }}>
       {children}
       <Modal open={progress}>
-        <div className='flex justify-center'>
-          <div className='bg-white p-4 w-fit rounded-md'>
-            <span className='text-blue-gray-800 font-medium text-sm'>Submitting reponse, Please wait...</span>
-          </div>
+        <div className='relative flex justify-center items-center'>
+          <img src={Logo} className='absolute size-44 z-10' alt="logo" />
+          <Spinner className='absolute size-48' color='green' />
         </div>
       </Modal>
     </ProgressContext.Provider>

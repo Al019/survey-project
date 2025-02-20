@@ -29,7 +29,7 @@ const SideBar = () => {
             </div>
           </div>
           <List>
-            <Chip value={user.role === 'admin' && 'Administrator' || user.role === 'enumerator' && 'Enumerator'} variant="outlined" className="w-fit mb-4" color="green" />
+            <Chip value={user.role === 'admin' && 'Administrator' || user.role === 'enumerator' && 'Enumerator' || user.role === 'viewer' && 'Viewer'} variant="outlined" className="w-fit mb-4" color="green" />
             <Accordion open={open === 1} icon={<ChevronDownIcon strokeWidth={2.5} className={`mx-auto h-4 w-4 transition-transform ${open === 1 ? "rotate-180" : ""}`} />}>
               <ListItem className="p-0">
                 <AccordionHeader onClick={() => handleOpen(1)} className="border-b-0 p-3">
@@ -67,11 +67,32 @@ const SideBar = () => {
                   </NavLink>
                 </div>
                 <div>
-                  <NavLink onClick={closeSidebar} href={route('admin.enumerator.list')} active={location.pathname.startsWith('/admin/enumerators')} label='Enumerators'>
-                    <ListItemPrefix>
-                      <UsersIcon className="h-5 w-5" />
-                    </ListItemPrefix>
-                  </NavLink>
+                  <Accordion open={open === 2} icon={<ChevronDownIcon strokeWidth={2.5} className={`mx-auto h-4 w-4 transition-transform ${open === 2 ? "rotate-180" : ""}`} />}>
+                    <ListItem className="p-0">
+                      <AccordionHeader onClick={() => handleOpen(2)} className="border-b-0 p-3">
+                        <ListItemPrefix>
+                          <UsersIcon className="h-5 w-5" />
+                        </ListItemPrefix>
+                        <span className="mr-auto text-sm font-normal">
+                          Users
+                        </span>
+                      </AccordionHeader>
+                    </ListItem>
+                    <AccordionBody className="py-1">
+                      <List className="p-0">
+                        <NavLink onClick={closeSidebar} href={route('admin.enumerator.list')} active={location.pathname.startsWith('/admin/enumerators')} label='Enumerators'>
+                          <ListItemPrefix>
+                            <ChevronRightIcon strokeWidth={2.5} className="h-3.5 w-3.5" />
+                          </ListItemPrefix>
+                        </NavLink>
+                        <NavLink onClick={closeSidebar} href={route('admin.viewer.list')} active={location.pathname.startsWith('/admin/viewers')} label='Viewers'>
+                          <ListItemPrefix>
+                            <ChevronRightIcon strokeWidth={2.5} className="h-3.5 w-3.5" />
+                          </ListItemPrefix>
+                        </NavLink>
+                      </List>
+                    </AccordionBody>
+                  </Accordion>
                 </div>
                 <div>
                   <NavLink onClick={closeSidebar} href={route('admin.survey.list')} active={location.pathname.startsWith('/admin/surveys')} label='Surveys'>
@@ -93,6 +114,24 @@ const SideBar = () => {
                 </div>
                 <div>
                   <NavLink onClick={closeSidebar} href={route('enumerator.survey.list')} active={location.pathname.startsWith('/enumerator/surveys')} label='Surveys'>
+                    <ListItemPrefix>
+                      <DocumentDuplicateIcon className="h-5 w-5" />
+                    </ListItemPrefix>
+                  </NavLink>
+                </div>
+              </div>
+            )}
+            {user.role === 'viewer' && (
+              <div className="space-y-2">
+                <div>
+                  <NavLink onClick={closeSidebar} href={route('viewer.dashboard')} active={location.pathname.startsWith('/viewer/dashboard')} label='Dashboard'>
+                    <ListItemPrefix>
+                      <PresentationChartLineIcon className="h-5 w-5" />
+                    </ListItemPrefix>
+                  </NavLink>
+                </div>
+                <div>
+                  <NavLink onClick={closeSidebar} href={route('viewer.survey.list')} active={location.pathname.startsWith('/viewer/surveys')} label='Surveys'>
                     <ListItemPrefix>
                       <DocumentDuplicateIcon className="h-5 w-5" />
                     </ListItemPrefix>

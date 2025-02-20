@@ -37,6 +37,8 @@ class AuthenticatedSessionController extends Controller
 
         if ($role === "enumerator") {
             return redirect()->intended(route('enumerator.dashboard', absolute: false));
+        } else if ($role === "viewer") {
+            return redirect()->intended(route('viewer.dashboard', absolute: false));
         }
 
         return redirect()->intended(route('admin.dashboard', absolute: false));
