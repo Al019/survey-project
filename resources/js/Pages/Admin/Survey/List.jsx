@@ -1,11 +1,26 @@
+import Loader from "@/Components/Loader"
 import Tbl from "@/Components/Table"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
 import { Link, router, usePage } from "@inertiajs/react"
 import { Button } from "@material-tailwind/react"
+import axios from "axios"
+import { useEffect, useState } from "react"
 
 const List = () => {
-  const { surveys } = usePage().props
+  const [surveys, setSurvey] = useState([])
+  const [loading, setLoading] = useState(true)
+
   const formatDateTime = (date) => new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" })
+
+  useEffect(() => {
+    axios.get(route('api.admin.survey.list'))
+      .then(({ data }) => {
+        setSurvey(data)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
 
   const dataTable = {
     theads: [
@@ -35,9 +50,13 @@ const List = () => {
         </Button>
       </Link>
     }>
-      <div className='p-4 mt-[80px]'>
-        <Tbl title="Surveys" data={dataTable} idKey="id" onClickView={handleNavigate} />
-      </div>
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className='p-4 mt-[80px]'>
+          <Tbl title="Surveys" data={dataTable} idKey="id" onClickView={handleNavigate} />
+        </div>
+      )}
     </AuthenticatedLayout>
   )
 }

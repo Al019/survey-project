@@ -1,25 +1,33 @@
+import Loader from "@/Components/Loader"
 import Tbl from "@/Components/Table"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout"
-import { Link, router, usePage } from "@inertiajs/react"
-import { Button } from "@material-tailwind/react"
+import { router } from "@inertiajs/react"
+import axios from "axios"
+import { useEffect, useState } from "react"
 
 const List = () => {
-  const { surveys } = usePage().props
-  const formatDateTime = (date) => new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" })
+  const [surveys, setSurvey] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    axios.get(route('api.viewer.survey.list'))
+      .then(({ data }) => {
+        setSurvey(data)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
 
   const dataTable = {
     theads: [
       "Title",
-      "Assign Enumerators",
       "Total Responses",
-      "Date Created",
     ],
     tbodies: surveys.map((survey) => ({
       id: survey.id,
       title: survey.title,
-      assign: survey.assign_count,
       reponse: survey.response_count,
-      created_at: formatDateTime(survey.created_at)
     }))
   }
 
@@ -29,9 +37,13 @@ const List = () => {
 
   return (
     <AuthenticatedLayout title="Surveys">
-      <div className='p-4 mt-[80px]'>
-        <Tbl title="Surveys" data={dataTable} idKey="id" onClickView={handleNavigate} />
-      </div>
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className='p-4 mt-[80px]'>
+          <Tbl title="Surveys" data={dataTable} idKey="id" onClickView={handleNavigate} />
+        </div>
+      )}
     </AuthenticatedLayout>
   )
 }

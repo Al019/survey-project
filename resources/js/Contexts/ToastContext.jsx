@@ -22,7 +22,7 @@ export const ToastProvider = ({ children }) => {
         pauseOnFocusLoss={false}
         draggable
         pauseOnHover={false}
-        theme="light"
+        theme="colored"
         className="text-sm" />
     </ToastContext.Provider>
   );

@@ -16,19 +16,12 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AdminController extends Controller
 {
-    public function dashboard()
-    {
-        return Inertia::render('Admin/Dashboard');
-    }
-
     public function enumeratorList()
     {
         $enumerators = User::where("role", "enumerator")
             ->get();
 
-        return Inertia::render('Admin/Enumerator/List', [
-            'enumerators' => $enumerators,
-        ]);
+        return response()->json($enumerators);
     }
 
     public function addEnumerator(Request $request)
@@ -63,26 +56,7 @@ class AdminController extends Controller
             ->where("role", "enumerator")
             ->first();
 
-        if (!$enumerator) {
-            abort(404);
-        }
-
-        return Inertia::render('Admin/Enumerator/View', [
-            'enumerator' => $enumerator,
-        ]);
-    }
-
-    public function deleteEnumerator(Request $request)
-    {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
-        $enumerator = User::findOrFail($request->enumerator_id);
-
-        $enumerator->delete();
-
-        return redirect(route('admin.enumerator.list'));
+        return response()->json($enumerator);
     }
 
     public function viewerList()
@@ -90,9 +64,16 @@ class AdminController extends Controller
         $viewers = User::where("role", "viewer")
             ->get();
 
-        return Inertia::render('Admin/Viewer/List', [
-            'viewers' => $viewers
-        ]);
+        return response()->json($viewers);
+    }
+
+    public function viewViewer(Request $request)
+    {
+        $viewer = User::where("id", $request->viewer_id)
+            ->where("role", "viewer")
+            ->first();
+
+        return response()->json($viewer);
     }
 
     public function addViewer(Request $request)
@@ -121,23 +102,21 @@ class AdminController extends Controller
         // Mail::to($request->email)->send(new PasswordMail($password));
     }
 
-    public function surveyList()
+    public function surveyList(Request $request)
     {
-        $surveys = Survey::withCount('response', 'survey_assignment as assign_count')
+        $surveys = Survey::withCount([
+            'survey_assignment as assign_count',
+            'response' => function ($query) {
+                $query->whereHas('answer');
+            }
+        ])
             ->latest()
             ->get();
 
-        return Inertia::render('Admin/Survey/List', [
-            'surveys' => $surveys,
-        ]);
+        return response()->json($surveys);
     }
 
-    public function surveyCreate()
-    {
-        return Inertia::render('Admin/Survey/Create');
-    }
-
-    public function createSurvey(Request $request)
+    public function publishSurvey(Request $request)
     {
         $user_id = auth()->user()->id;
 
@@ -147,16 +126,9 @@ class AdminController extends Controller
             "description" => $request["description"],
         ]);
 
-        return Inertia::render('Admin/Survey/Create', [
-            'survey' => $survey,
-        ]);
-    }
-
-    public function publishSurvey(Request $request)
-    {
         foreach ($request["questions"] as $questionData) {
             $question = Question::create([
-                'survey_id' => $request->survey_id,
+                'survey_id' => $survey->id,
                 'text' => $questionData['text'],
                 'type' => $questionData['type'],
                 'required' => $questionData['required'],
@@ -174,17 +146,28 @@ class AdminController extends Controller
     public function viewSurvey(Request $request)
     {
         $survey = Survey::where('id', $request->survey_id)
-            ->withCount('response')
+            ->withCount([
+                'response' => function ($query) {
+                    $query->whereHas('answer');
+                }
+            ])
             ->with('question.option')
             ->first();
-
-        if (!$survey) {
-            abort(404);
-        }
 
         $responses = Response::where('survey_id', $survey->id)
             ->with('answer.answer_option')
             ->get();
+
+        return response()->json([
+            'survey' => $survey,
+            'responses' => $responses,
+        ]);
+    }
+
+    public function getEnumerator(Request $request)
+    {
+        $survey = Survey::where('id', $request->survey_id)
+            ->first();
 
         $notAssignEnumerators = User::where('role', 'enumerator')
             ->whereDoesntHave('survey_assignment', function ($query) use ($survey) {
@@ -199,13 +182,12 @@ class AdminController extends Controller
             ->withCount([
                 'response' => function ($query) use ($survey) {
                     $query->where('survey_id', $survey->id);
+                    $query->whereHas('answer');
                 }
             ])
             ->get();
 
-        return Inertia::render('Admin/Survey/View', [
-            'survey' => $survey,
-            'responses' => $responses,
+        return response()->json([
             'notAssignEnumerators' => $notAssignEnumerators,
             'assignEnumerators' => $assignEnumerators,
         ]);
@@ -225,11 +207,8 @@ class AdminController extends Controller
             'password' => ['required', 'current_password'],
         ]);
 
-        $survey = Survey::findOrFail($request->survey_id);
-
-        $survey->delete();
-
-        return redirect(route('admin.survey.list'));
+        Survey::find($request->survey_id)
+            ->delete();
     }
 
     public function exportResponse(Request $request)

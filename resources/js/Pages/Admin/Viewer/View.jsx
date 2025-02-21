@@ -9,22 +9,22 @@ import Loader from "@/Components/Loader";
 const tabs = ["Personal Details"]
 
 const View = () => {
-  const [enumerator, setEnumerator] = useState({})
+  const [viewer, setViewer] = useState({})
   const [activeTab, setActiveTab] = useState(tabs[0])
   const [loading, setLoading] = useState(true)
 
-  const enumerator_id = new URLSearchParams(window.location.search).get('enumerator_id');
+  const viewer_id = new URLSearchParams(window.location.search).get('viewer_id')
 
   useEffect(() => {
-    if (enumerator_id) {
-      getEnumerator()
+    if (viewer_id) {
+      getViewer()
     }
-  }, [enumerator_id])
+  }, [viewer_id])
 
-  const getEnumerator = async () => {
-    await axios.get(route('api.admin.view.enumerator', { enumerator_id }))
+  const getViewer = async () => {
+    await axios.get(route('api.admin.view.viewer', { viewer_id }))
       .then(({ data }) => {
-        setEnumerator(data)
+        setViewer(data)
       })
       .finally(() => {
         setLoading(false)
@@ -35,7 +35,7 @@ const View = () => {
     <Tabs value={activeTab}>
       <AuthenticatedLayout title={
         <div>
-          {enumerator.first_name} {enumerator.last_name}
+          {viewer.first_name} {viewer.last_name}
         </div>
       } tab={
         <div className="h-[30px] flex justify-start items-end px-4">
@@ -71,22 +71,22 @@ const View = () => {
                       <img src={User} className="h-24 w-24" />
                       <div className='flex flex-col space-y-2'>
                         <span className='text-base font-semibold text-blue-gray-800'>
-                          {enumerator.first_name} {enumerator.last_name}
+                          {viewer.first_name} {viewer.last_name}
                         </span>
-                        <Chip value={enumerator.role === 'admin' && 'Administrator' || enumerator.role === 'enumerator' && 'Enumerator'} variant="outlined" className="w-fit" color="green" />
+                        <Chip value={viewer.role === 'admin' && 'Administrator' || viewer.role === 'viewer' && 'viewer'} variant="outlined" className="w-fit" color="green" />
                       </div>
                     </div>
-                    <Chip value={enumerator.status} variant="ghost" className="w-fit" color={enumerator.status === 'active' ? 'green' : 'red'} />
+                    <Chip value={viewer.status} variant="ghost" className="w-fit" color={viewer.status === 'active' ? 'green' : 'red'} />
                   </CardBody>
                 </Card>
                 <Card className='h-fit shadow-none border border-gray-200'>
                   <CardBody className='max-sm:p-4'>
                     <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
-                      <Inpt value={enumerator.last_name} variant="standard" label="Last Name" />
-                      <Inpt value={enumerator.first_name} variant="standard" label="First Name" />
-                      <Inpt value={enumerator.middle_name === null ? '-' : enumerator.middle_name} variant="standard" label="Middle Name" />
-                      <Inpt value={enumerator.gender} variant="standard" label="Gender" className="capitalize" />
-                      <Inpt value={enumerator.email} variant="standard" label="Email Address" />
+                      <Inpt value={viewer.last_name} variant="standard" label="Last Name" />
+                      <Inpt value={viewer.first_name} variant="standard" label="First Name" />
+                      <Inpt value={viewer.middle_name === null ? '-' : viewer.middle_name} variant="standard" label="Middle Name" />
+                      <Inpt value={viewer.gender} variant="standard" label="Gender" className="capitalize" />
+                      <Inpt value={viewer.email} variant="standard" label="Email Address" />
                     </div>
                   </CardBody>
                 </Card>

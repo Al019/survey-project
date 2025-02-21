@@ -117,7 +117,7 @@ const Tbl = ({ title, data, onClickView, idKey, onClickEdit, loading, onClickAss
                       )}
                       {onClickAssign && (
                         <td className="p-4">
-                          <Button onClick={() => onClickAssign(record)} size="sm" color="green" disabled={btnLoading}>
+                          <Button onClick={() => onClickAssign(record)} variant="outlined" size="sm" color="green" loading={btnLoading[record.id]}>
                             Assign
                           </Button>
                         </td>
