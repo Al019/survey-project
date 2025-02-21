@@ -38,7 +38,7 @@ const View = () => {
           {enumerator.first_name} {enumerator.last_name}
         </div>
       } tab={
-        <div className="h-[30px] flex justify-start items-end px-4">
+        <div className="h-[30px] overflow-x-auto flex max-sm:justify-center items-end px-4">
           <TabsHeader
             className="w-fit space-x-6 rounded-none border-b border-blue-gray-50 bg-transparent p-0"
             indicatorProps={{

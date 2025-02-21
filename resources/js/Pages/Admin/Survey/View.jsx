@@ -5,14 +5,14 @@ import { useEffect, useState } from "react"
 import Inpt from "@/Components/Input"
 import Tbl from "@/Components/Table"
 import Modal from "@/Components/Modal"
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import { Pie, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import InputError from "@/Components/InputError"
 import axios from "axios"
 import Loader from "@/Components/Loader"
 
-ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels, CategoryScale, LinearScale, BarElement);
 
 const colors = [
   "#f44336", "#4caf50", "#2196f3", "#ff9800", "#3f51b5",
@@ -86,24 +86,66 @@ const View = () => {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
             display: false,
           },
           tooltip: {
-            enabled: false, // Disable tooltips
+            enabled: false,
           },
           datalabels: {
-            color: '#fff', // Set text color
+            color: '#fff',
             anchor: 'center',
             align: 'center',
             font: {
-              size: 12,
+              size: 14,
             },
             formatter: (value, context) => {
               let percentage = ((value / total) * 100).toFixed(2);
-              return percentage > 0 ? `${percentage}%` : ''; // Hide 0% values
+              return percentage > 0 ? `${percentage}%` : '';
             },
+          },
+        },
+      },
+    };
+  };
+
+  const barChartConfig = (series, labels) => {
+    return {
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: series,
+            backgroundColor: colors,
+            borderWidth: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            enabled: false,
+          },
+          datalabels: {
+            color: '#000',
+            anchor: 'end',
+            align: 'top',
+            font: {
+              size: 14,
+            },
+            formatter: (value) => value > 0 ? value : '',
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
           },
         },
       },
@@ -206,7 +248,7 @@ const View = () => {
           Assign
         </Button>
       } title={survey.title} tab={
-        <div className="h-[30px] flex justify-center items-end">
+        <div className="h-[30px] overflow-x-auto flex justify-center items-end">
           <TabsHeader
             className="w-fit space-x-6 rounded-none border-b border-blue-gray-50 bg-transparent p-0"
             indicatorProps={{
@@ -232,9 +274,9 @@ const View = () => {
         ) : (
           <div className="mt-[110px]">
             <TabsBody>
-              <TabPanel value="Responses">
+              <TabPanel value="Responses" className="max-sm:p-2">
                 <Card className="shadow-none border border-gray-200">
-                  <CardBody className="flex items-center justify-between">
+                  <CardBody className="flex items-center justify-between max-sm:p-4">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-normal">
                         Total Responses:
@@ -254,43 +296,72 @@ const View = () => {
                       <div key={qIndex}>
                         {(question.type === 'radio' || question.type === 'select' || question.type === 'checkbox') && (
                           <Card className="shadow-none border border-gray-200">
-                            <CardBody className="space-y-6">
+                            <CardBody className="space-y-6 max-sm:p-4">
                               <div className="space-y-3">
                                 <span className="text-xs font-normal">Question {qIndex + 1}</span>
                                 <h1 className="text-sm font-medium">{question.text}</h1>
                               </div>
                               {(() => {
                                 const { series, labels } = calculateResponseData(question);
-                                const chartData = pieChartConfig(series, labels);
+                                const isBarChart = question.option.length > 8
+                                const chartData = isBarChart ? barChartConfig(series, labels) : pieChartConfig(series, labels);
                                 return (
-                                  <div className="grid grid-cols-2 items-center gap-4">
-                                    <div>
-                                      <Pie data={chartData.data} options={chartData.options} />
+                                  <div className={!isBarChart ? 'grid grid-cols-2 gap-4' : ''}>
+                                    <div className="w-full mx-auto h-[300px] sm:h-[400px]">
+                                      {isBarChart ? (
+                                        <Bar data={chartData.data} options={chartData.options} />
+                                      ) : (
+                                        <Pie data={chartData.data} options={chartData.options} />
+                                      )}
                                     </div>
-                                    <div className="space-y-2 flex flex-col justify-center items-start">
-                                      {question.option.map((option, oIndex) => {
-                                        const counts = series[oIndex]
-                                        return (
-                                          <div key={oIndex} className="w-full flex justify-between items-center gap-2">
-                                            <div className="flex items-center gap-2">
-                                              <div>
-                                                <div
-                                                  style={{ backgroundColor: colors[oIndex] }}
-                                                  className="size-4 rounded-full"
-                                                ></div>
+                                    {!isBarChart && (
+                                      <div className="space-y-2 flex flex-col justify-center items-start">
+                                        {question.option.map((option, oIndex) => {
+                                          const counts = series[oIndex];
+                                          return (
+                                            <div key={oIndex} className="w-full flex justify-between items-center gap-2">
+                                              <div className="flex items-center gap-2">
+                                                <div>
+                                                  <div
+                                                    style={{ backgroundColor: colors[oIndex] }}
+                                                    className="size-4 rounded-full"
+                                                  ></div>
+                                                </div>
+                                                <p className="text-sm font-normal">{option.text}</p>
                                               </div>
-                                              <p className="text-sm font-normal">{option.text}</p>
+                                              <div>
+                                                <span>{counts}</span>
+                                              </div>
                                             </div>
-                                            <div>
-                                              <span>{counts}</span>
-                                            </div>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })()}
+                            </CardBody>
+                          </Card>
+                        )}
+                        {question.type === 'input' && (
+                          <Card className="shadow-none border overflow-hidden border-gray-200 max-h-[500px]">
+                            <CardBody className="space-y-6 max-sm:p-4">
+                              <div className="space-y-3">
+                                <span className="text-xs font-normal">Question {qIndex + 1}</span>
+                                <h1 className="text-sm font-medium">{question.text}</h1>
+                              </div>
+                              <div className="overflow-y-auto max-h-[360px] space-y-2">
+                                {responses.map((res, resIndex) => {
+                                  const answer = res.answer.find(ans => ans.question_id === question.id)
+                                  if (answer) {
+                                    return (
+                                      <p key={resIndex} className="text-sm font-normal p-2 bg-gray-100 rounded-md">
+                                        {answer.text}
+                                      </p>
+                                    )
+                                  }
+                                })}
+                              </div>
                             </CardBody>
                           </Card>
                         )}
@@ -299,10 +370,10 @@ const View = () => {
                   </div>
                 )}
               </TabPanel>
-              <TabPanel value="Assignments">
+              <TabPanel value="Assignments" className="max-sm:p-2">
                 <Tbl title="Enumerators" data={dataTableAssignEnumerator} />
               </TabPanel>
-              <TabPanel value="Settings">
+              <TabPanel value="Settings" className="max-sm:p-2">
                 <Card className="shadow-none border border-gray-200">
                   <CardBody className="space-y-4 max-sm:p-4">
                     <h1 className="font-medium">Manage Survey</h1>

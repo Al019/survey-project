@@ -13,7 +13,11 @@ class ViewerController extends Controller
     public function surveyList()
     {
         $surveys = Survey::whereHas('survey_assignment')
-            ->withCount('response')
+            ->withCount([
+                'response' => function ($query) {
+                    $query->whereHas('answer');
+                }
+            ])
             ->latest()
             ->get();
 
@@ -23,7 +27,11 @@ class ViewerController extends Controller
     public function viewSurvey(Request $request)
     {
         $survey = Survey::where('id', $request->survey_id)
-            ->withCount('response')
+            ->withCount([
+                'response' => function ($query) {
+                    $query->whereHas('answer');
+                }
+            ])
             ->with('question.option')
             ->first();
 

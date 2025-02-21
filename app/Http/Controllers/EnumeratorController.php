@@ -7,11 +7,6 @@ use App\Models\AnswerOption;
 use App\Models\Response;
 use App\Models\Survey;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
-use PhpOffice\PhpSpreadsheet\Style\Protection;
 
 class EnumeratorController extends Controller
 {
@@ -95,125 +90,6 @@ class EnumeratorController extends Controller
                 ]);
             }
         }
-    }
-
-    public function exportAnswerSheet(Request $request)
-    {
-        $survey = Survey::where('id', $request->survey_id)
-            ->with('question.option')
-            ->first();
-
-        if (!$survey) {
-            abort(404);
-        }
-
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $hiddenSheet = $spreadsheet->createSheet();
-        $hiddenSheet->setTitle('Options'); // Ensure options sheet is created
-
-        // Headers
-        $sheet->setCellValue('A1', 'ID');
-        $sheet->setCellValue('B1', 'Question Type');
-        $sheet->setCellValue('C1', 'Question');
-        $sheet->setCellValue('D1', 'Answer'); // Will expand dynamically
-
-        // Set column widths
-        $sheet->getColumnDimension('A')->setWidth(10);
-        $sheet->getColumnDimension('B')->setWidth(20);
-        $sheet->getColumnDimension('C')->setWidth(30);
-        $sheet->getColumnDimension('D')->setWidth(20);
-        $sheet->getStyle('C')->getAlignment()->setWrapText(true);
-        $sheet->getStyle('D')->getAlignment()->setWrapText(true);
-
-        // Lock Columns A and B (Make Read-Only)
-        $sheet->getProtection()->setSheet(true);
-        $sheet->getStyle('A:B')->getProtection()->setLocked(Protection::PROTECTION_PROTECTED);
-        $sheet->getStyle('C:D')->getProtection()->setLocked(Protection::PROTECTION_UNPROTECTED);
-
-        // Question Type Mapping
-        $typeMapping = [
-            'input' => 'Open ended',
-            'radio' => 'Multiple choice',
-            'select' => 'Dropdown',
-            'checkbox' => 'Checkboxes',
-        ];
-
-        $row = 2;
-        $optionRow = 1; // Start row for options
-
-        foreach ($survey->question as $question) {
-            $questionType = $typeMapping[$question->type] ?? ucfirst($question->type);
-            $sheet->setCellValue("A{$row}", $question->id);
-            $sheet->setCellValue("B{$row}", $questionType); // Use mapped question type
-            $sheet->setCellValue("C{$row}", $question->text);
-
-            if (in_array($question->type, ['radio', 'select', 'checkbox', 'multi-select']) && count($question->option) > 0) {
-                // Store answer choices in the hidden sheet
-                $options = array_column($question->option->toArray(), 'text');
-
-                foreach ($options as $index => $option) {
-                    $hiddenSheet->setCellValue("A" . ($optionRow + $index), $option);
-                }
-
-                $startCell = "A{$optionRow}";
-                $endCell = "A" . ($optionRow + count($options) - 1);
-                $excelRange = "Options!$" . $startCell . ":$" . $endCell; // Absolute range
-
-                if (in_array($question->type, ['radio', 'select'])) {
-                    // Only ONE column for Radio and Select types
-                    $col = 'D';
-
-                    $sheet->setCellValue(
-                        "{$col}1",
-                        "Answer"
-                    );
-                    $sheet->getColumnDimension($col)->setWidth(20);
-                    $sheet->getStyle($col)->getAlignment()->setWrapText(true);
-                    $sheet->getStyle($col)->getProtection()->setLocked(Protection::PROTECTION_UNPROTECTED);
-
-                    // Apply Dropdown Validation (Only One Answer Allowed)
-                    $validation = $sheet->getCell("{$col}{$row}")->getDataValidation();
-                    $validation->setType(DataValidation::TYPE_LIST);
-                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                    $validation->setAllowBlank(false);
-                    $validation->setShowDropDown(true);
-                    $validation->setFormula1($excelRange);
-                } elseif (in_array($question->type, ['checkbox'])) {
-                    // Multi-select (Expands to D, E, F)
-                    $maxOptions = count($options);
-                    $columns = range('D', chr(68 + $maxOptions - 1));
-
-                    foreach ($columns as $col) {
-                        $sheet->setCellValue("{$col}1", "Answer " . (ord($col) - 67));
-                        $sheet->getColumnDimension($col)->setWidth(20);
-                        $sheet->getStyle($col)->getAlignment()->setWrapText(true);
-                        $sheet->getStyle($col)->getProtection()->setLocked(Protection::PROTECTION_UNPROTECTED);
-
-                        $validation = $sheet->getCell("{$col}{$row}")->getDataValidation();
-                        $validation->setType(DataValidation::TYPE_LIST);
-                        $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                        $validation->setAllowBlank(false);
-                        $validation->setShowDropDown(true);
-                        $validation->setFormula1($excelRange);
-                    }
-                }
-
-                $optionRow += count($options); // Move to the next available row in the hidden sheet
-            }
-
-            $row++;
-        }
-
-        $hiddenSheet->setSheetState(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet::SHEETSTATE_HIDDEN);
-
-        // Save to storage
-        $fileName = $survey->title . ' ' . 'Answer Sheet.xlsx';
-        $filePath = storage_path("app/public/{$fileName}");
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($filePath);
-
-        return response()->download($filePath, $fileName)->deleteFileAfterSend();
     }
 
 }

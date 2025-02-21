@@ -182,7 +182,7 @@ const Create = () => {
           Publish
         </Button>
       } tab={
-        <div className="h-[30px] flex justify-center items-end">
+        <div className="h-[30px] overflow-x-auto flex justify-center items-end">
           <TabsHeader
             className="w-fit space-x-6 rounded-none border-b border-blue-gray-50 bg-transparent p-0"
             indicatorProps={{
@@ -205,7 +205,7 @@ const Create = () => {
       }>
         <div className="max-w-[800px] mx-auto mt-[110px]">
           <TabsBody>
-            <TabPanel value="Questions" className="space-y-4 pb-40">
+            <TabPanel value="Questions" className="space-y-4 max-sm:space-y-2 max-sm:p-2 mb-40">
               <Card onClick={() => setSelected(0)} className={`shadow-none ${selected === 0 ? "border-2 border-green-500" : "border border-gray-200"}`}>
                 <CardBody className="space-y-4 max-sm:p-4">
                   <Textarea
@@ -233,20 +233,22 @@ const Create = () => {
               {survey.questions.map((question, qIndex) => (
                 <Card ref={el => questionRefs.current[qIndex] = el} onClick={() => setSelected(qIndex + 1)} key={qIndex} className={`shadow-none ${selected === qIndex + 1 ? "border-2 border-green-500" : "border border-gray-200"}`}>
                   <CardBody className="space-y-4 max-sm:p-4">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 max-sm:flex-col">
                       <Textarea
                         value={question.text} onChange={(e) => handleChangeQuestion(qIndex, "text", e.target.value)} label={`Question ${qIndex + 1}`} variant="standard" color="green"
                         style={{
                           minHeight: "32px",
                         }}
                       />
-                      <div className="w-fit">
-                        <Select value={question.type} onChange={(val) => handleChangeQuestion(qIndex, "type", val)} label="Type" color="green">
-                          <Option value="radio">Multiple choice</Option>
-                          <Option value="checkbox">Checkboxes</Option>
-                          <Option value="select">Dropdown</Option>
-                          <Option value="input">Open ended</Option>
-                        </Select>
+                      <div className="max-sm:flex max-sm:w-full max-sm:justify-end">
+                        <div className="w-fit">
+                          <Select value={question.type} onChange={(val) => handleChangeQuestion(qIndex, "type", val)} label="Type" color="green">
+                            <Option value="radio">Multiple choice</Option>
+                            <Option value="checkbox">Checkboxes</Option>
+                            <Option value="select">Dropdown</Option>
+                            <Option value="input">Open ended</Option>
+                          </Select>
+                        </div>
                       </div>
                     </div>
                     {question.options.map((option, oIndex) => (
@@ -292,7 +294,7 @@ const Create = () => {
                 </Card>
               </div>
             </TabPanel>
-            <TabPanel value="Settings">
+            <TabPanel value="Settings" className="max-sm:p-2">
               <Card className="shadow-none border border-gray-200">
                 <CardBody className="space-y-4 max-sm:p-4">
                   <h1 className="font-medium">Manage Survey</h1>

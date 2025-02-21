@@ -22,7 +22,7 @@ const colors = [
   "#ff3d00", "#1de9b6", "#ff6d00", "#ff4081"
 ];
 
-const tabs = ["Questions", "Responses", "Settings"]
+const tabs = ["Questions", "Responses"]
 
 const View = () => {
   const [survey, setSurvey] = useState([])
@@ -151,6 +151,7 @@ const View = () => {
       ]
 
       localStorage.setItem(`answers_${survey.id}`, JSON.stringify(newAnswers))
+      setValidationErrors((prevErrors) => prevErrors.filter((id) => id !== questionId))
       return newAnswers
     })
   }
@@ -178,6 +179,7 @@ const View = () => {
       }
 
       localStorage.setItem(`answers_${survey.id}`, JSON.stringify(updatedAnswers))
+      setValidationErrors((prevErrors) => prevErrors.filter((id) => id !== questionId))
       return updatedAnswers
     })
   }
@@ -196,9 +198,11 @@ const View = () => {
           },
         ]
         localStorage.setItem(`answers_${survey.id}`, JSON.stringify(newAnswers))
+        setValidationErrors((prevErrors) => prevErrors.filter((id) => id !== questionId))
         return newAnswers
       } else {
         localStorage.setItem(`answers_${survey.id}`, JSON.stringify(updatedAnswers))
+        setValidationErrors((prevErrors) => prevErrors.filter((id) => id !== questionId))
         return updatedAnswers
       }
     })
@@ -208,8 +212,10 @@ const View = () => {
     if (unansweredQuestions.length > 0) {
       const firstUnansweredQuestionId = unansweredQuestions[0].id;
       const questionElement = document.getElementById(`question-${firstUnansweredQuestionId}`);
+
       if (questionElement) {
-        questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const topOffset = questionElement.getBoundingClientRect().top + window.scrollY - 200
+        window.scrollTo({ top: topOffset, behavior: 'smooth' });
       }
     }
   }
@@ -221,6 +227,7 @@ const View = () => {
     if (unansweredQuestions.length > 0) {
       setValidationErrors(unansweredQuestions.map(q => q.id))
       scrollToFirstUnansweredQuestion(unansweredQuestions)
+      showToast("Please answer all required questions.", 'warning')
       return
     }
 
@@ -233,25 +240,25 @@ const View = () => {
       localStorage.removeItem(`answers_${survey.id}`);
       setAnswer([]);
       setValidationErrors([]);
-      setSubmitted(true);
-      showToast("Submit response successfully.");
+      showToast("Response submitted successfully.");
+      setSubmitted(true)
     } catch (error) {
-      showToast("Failed to submit response. Please try again.", 'error');
+      if (error.response) {
+        showToast("Failed to submit response. Please try again.", 'error')
+      } else if (error.request) {
+        showToast("Network error. Please check your connection.", 'error')
+      } else {
+        showToast("An unexpected error occurred. Please try again.", 'error')
+      }
     } finally {
       setProcessing(false);
     }
   }
 
-  const handleExportAnswerSheet = () => {
-    window.open(route('api.enumerator.export.answer.sheet',
-      { survey_id: survey.id }
-    ), '_blank')
-  }
-
   return (
     <Tabs value={activeTab}>
       <AuthenticatedLayout title={survey.title} button={
-        <Button onClick={handleSubmit} color="green" loading={processing} className={(activeTab !== 'Questions' || submitted) ? 'hidden' : ''}>
+        <Button onClick={handleSubmit} color="green" loading={processing} className={activeTab !== 'Questions' ? 'hidden' : ''}>
           Submit
         </Button>
       } tab={
@@ -282,31 +289,31 @@ const View = () => {
           <div className="max-w-[800px] mx-auto mt-[110px]">
             <TabsBody>
               <TabPanel value="Questions" className="max-sm:p-2">
-                {submitted ? (
-                  <Card className="shadow-none border border-gray-200">
-                    <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
-                      <h1 className="text-sm font-normal">
-                        Survey submitted successfully. Thank you for your response.
-                      </h1>
-                      <div className="flex justify-end">
-                        <Button onClick={() => setSubmitted(false)} variant="outlined" color="green">
-                          Response again
-                        </Button>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ) : (
-                  <div className="space-y-4 max-sm:space-y-2">
-                    <Card className="shadow-none border border-gray-200">
-                      <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
-                        <h1 className="font-medium">
-                          {survey.title}
-                        </h1>
+                <Card className="shadow-none border border-gray-200 mb-4 max-sm:mb-2">
+                  <div className="bg-green-500 h-4 rounded-t-xl" />
+                  <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
+                    <h1 className="font-medium">
+                      {survey.title}
+                    </h1>
+                    <p className="text-sm font-normal">
+                      {survey.description}
+                    </p>
+                    {submitted && (
+                      <div className="space-y-4">
                         <p className="text-sm font-normal">
-                          {survey.description}
+                          Your response has been recorded.
                         </p>
-                      </CardBody>
-                    </Card>
+                        <div className="flex justify-end">
+                          <Button onClick={() => setSubmitted(false)} variant="text" size="sm" color="green">
+                            Submit another response
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
+                {!submitted && (
+                  <div className="space-y-4 max-sm:space-y-2">
                     {survey.question.map((question, qIndex) => (
                       <Card key={qIndex} id={`question-${question.id}`} className={`shadow-none ${validationErrors.includes(question.id) ? 'border-2 border-red-500' : 'border border-gray-200'}`}>
                         <CardBody className="space-y-6 max-sm:space-y-4 max-sm:p-4">
@@ -477,28 +484,6 @@ const View = () => {
                     ))}
                   </div>
                 )}
-              </TabPanel>
-              <TabPanel value="Settings" className="max-sm:p-2">
-                <Card className="shadow-none border border-gray-200">
-                  <CardBody className="space-y-4 max-sm:p-4">
-                    <h1 className="font-medium">Manage Survey</h1>
-                    <hr className="border-blue-gray-200" />
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="space-y-1">
-                        <h1 className="font-normal text-sm">Answer Sheet</h1>
-                        <p className="text-xs font-normal">Import existing answers.</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button color="green" variant="outlined" size="sm">
-                          Import
-                        </Button>
-                        <Button onClick={handleExportAnswerSheet} variant="text" size="sm">
-                          Download format
-                        </Button>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
               </TabPanel>
             </TabsBody>
           </div>

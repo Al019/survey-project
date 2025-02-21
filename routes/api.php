@@ -30,7 +30,6 @@ Route::middleware(['auth', 'enumerator'])->group(function () {
   Route::get('/api/enumerator/surveys/view', [EnumeratorController::class, 'viewSurvey'])->name('api.enumerator.view.survey');
   Route::get('/api/enumerator/surveys/responses', [EnumeratorController::class, 'getResponse'])->name('api.enumerator.survey.response');
   Route::post('/api/enumerator/surveys/submit/response', [EnumeratorController::class, 'submitResponse'])->name('api.enumerator.submit.response');
-  Route::get('/api/enumerator/surveys/export/answer/sheet', [EnumeratorController::class, 'exportAnswerSheet'])->name('api.enumerator.export.answer.sheet');
 
 });
 

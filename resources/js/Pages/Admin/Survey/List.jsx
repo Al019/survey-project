@@ -53,7 +53,7 @@ const List = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className='p-4 mt-[80px]'>
+        <div className='p-4 max-sm:p-2 mt-[80px]'>
           <Tbl title="Surveys" data={dataTable} idKey="id" onClickView={handleNavigate} />
         </div>
       )}
